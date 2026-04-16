@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { 
+import {
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -13,15 +13,17 @@ import {
   Calendar as CalendarIcon
 } from 'lucide-react';
 
-interface Task {
+interface Project {
   _id: string;
-  title: string;
+  name: string;
   description?: string;
-  status: 'todo' | 'in_progress' | 'done';
-  date: string;
-  startTime: string;
-  endTime: string;
-  project?: {
+  status: 'not_started' | 'in_progress' | 'completed' | 'on_hold';
+  endDate?: string;
+  projectType?: {
+    _id: string;
+    name: string;
+  };
+  assignedTo?: {
     _id: string;
     name: string;
   };
@@ -36,7 +38,7 @@ const MONTHS = [
 export default function CalendarPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -48,19 +50,19 @@ export default function CalendarPage() {
     }
     
     if (user) {
-      fetchTasks();
+      fetchProjects();
     }
   }, [user, authLoading, router]);
 
-  const fetchTasks = async () => {
+  const fetchProjects = async () => {
     try {
-      const res = await fetch('/api/tasks');
+      const res = await fetch('/api/projects');
       const data = await res.json();
       if (data.success) {
-        setTasks(data.data);
+        setProjects(data.data);
       }
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error('Error fetching projects:', error);
     } finally {
       setLoading(false);
     }
@@ -87,11 +89,12 @@ export default function CalendarPage() {
     return days;
   };
 
-  const getTasksForDate = (date: Date) => {
+  const getProjectsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return tasks.filter(task => {
-      const taskDate = new Date(task.date).toISOString().split('T')[0];
-      return taskDate === dateStr;
+    return projects.filter(project => {
+      if (!project.endDate) return false;
+      const projectEndDate = new Date(project.endDate).toISOString().split('T')[0];
+      return projectEndDate === dateStr;
     });
   };
 
@@ -119,12 +122,14 @@ export default function CalendarPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'todo':
+      case 'not_started':
         return 'bg-gray-100 border-gray-300';
       case 'in_progress':
         return 'bg-blue-100 border-blue-300';
-      case 'done':
+      case 'completed':
         return 'bg-green-100 border-green-300';
+      case 'on_hold':
+        return 'bg-yellow-100 border-yellow-300';
       default:
         return 'bg-gray-100 border-gray-300';
     }
@@ -132,19 +137,21 @@ export default function CalendarPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'todo':
+      case 'not_started':
         return <Clock className="w-3 h-3 text-gray-500" />;
       case 'in_progress':
         return <PlayCircle className="w-3 h-3 text-blue-500" />;
-      case 'done':
+      case 'completed':
         return <CheckCircle2 className="w-3 h-3 text-green-500" />;
+      case 'on_hold':
+        return <Clock className="w-3 h-3 text-yellow-500" />;
       default:
         return <Clock className="w-3 h-3 text-gray-500" />;
     }
   };
 
   const days = getDaysInMonth(currentDate);
-  const todayTasks = selectedDate ? getTasksForDate(selectedDate) : [];
+  const todayProjects = selectedDate ? getProjectsForDate(selectedDate) : [];
 
   if (loading || !user) {
     return (
@@ -161,7 +168,7 @@ export default function CalendarPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Calendar</h1>
-            <p className="text-gray-500 mt-1">View and manage your schedule</p>
+            <p className="text-gray-500 mt-1">View project due dates</p>
           </div>
           
           <button
@@ -213,7 +220,7 @@ export default function CalendarPage() {
                 return <div key={`empty-${index}`} className="h-20 md:h-24" />;
               }
 
-              const dayTasks = getTasksForDate(date);
+              const dayProjects = getProjectsForDate(date);
               const isSelected = selectedDate?.toDateString() === date.toDateString();
 
               return (
@@ -221,8 +228,8 @@ export default function CalendarPage() {
                   key={date.toISOString()}
                   onClick={() => setSelectedDate(date)}
                   className={`h-20 md:h-24 p-1 md:p-2 rounded-lg cursor-pointer transition-colors ${
-                    isSelected 
-                      ? 'bg-indigo-50 border-2 border-indigo-500' 
+                    isSelected
+                      ? 'bg-indigo-50 border-2 border-indigo-500'
                       : isToday(date)
                         ? 'bg-indigo-50 border border-indigo-300'
                         : 'hover:bg-gray-50 border border-transparent'
@@ -234,17 +241,17 @@ export default function CalendarPage() {
                     {date.getDate()}
                   </div>
                   <div className="space-y-1 overflow-hidden">
-                    {dayTasks.slice(0, 2).map((task) => (
-                      <div 
-                        key={task._id}
-                        className={`text-xs px-1 py-0.5 rounded border truncate ${getStatusColor(task.status)}`}
+                    {dayProjects.slice(0, 2).map((project) => (
+                      <div
+                        key={project._id}
+                        className={`text-xs px-1 py-0.5 rounded border truncate ${getStatusColor(project.status)}`}
                       >
-                        {task.title}
+                        {project.name}
                       </div>
                     ))}
-                    {dayTasks.length > 2 && (
+                    {dayProjects.length > 2 && (
                       <div className="text-xs text-gray-500 pl-1">
-                        +{dayTasks.length - 2} more
+                        +{dayProjects.length - 2} more
                       </div>
                     )}
                   </div>
@@ -258,31 +265,30 @@ export default function CalendarPage() {
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <CalendarIcon className="w-5 h-5" />
-            {selectedDate 
-              ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+            {selectedDate
+              ? `${selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} - Due Projects`
               : 'Select a date'
             }
           </h3>
 
-          {selectedDate && todayTasks.length > 0 ? (
+          {selectedDate && todayProjects.length > 0 ? (
             <div className="space-y-3">
-              {todayTasks.map((task) => (
+              {todayProjects.map((project) => (
                 <div
-                  key={task._id}
-                  className={`p-3 rounded-lg border ${getStatusColor(task.status)}`}
+                  key={project._id}
+                  className={`p-3 rounded-lg border ${getStatusColor(project.status)}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 text-sm">{task.title}</h4>
-                      {task.project && (
-                        <p className="text-xs text-gray-500 mt-1">{task.project.name}</p>
+                      <h4 className="font-medium text-gray-900 text-sm">{project.name}</h4>
+                      {project.projectType && (
+                        <p className="text-xs text-gray-500 mt-1">{project.projectType.name}</p>
                       )}
-                      <div className="flex items-center gap-2 mt-2 text-xs text-gray-600">
-                        <Clock className="w-3 h-3" />
-                        <span>{task.startTime} - {task.endTime}</span>
-                      </div>
+                      {project.assignedTo && (
+                        <p className="text-xs text-gray-500 mt-1">Assigned to: {project.assignedTo.name}</p>
+                      )}
                     </div>
-                    {getStatusIcon(task.status)}
+                    {getStatusIcon(project.status)}
                   </div>
                 </div>
               ))}
@@ -291,20 +297,20 @@ export default function CalendarPage() {
             <div className="text-center py-8">
               <CalendarIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 text-sm">
-                {selectedDate ? 'No tasks scheduled' : 'Select a date to view tasks'}
+                {selectedDate ? 'No projects due' : 'Select a date to view due projects'}
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Task Legend */}
+      {/* Project Legend */}
       <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Legend</h3>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded" />
-            <span className="text-sm text-gray-600">To Do</span>
+            <span className="text-sm text-gray-600">Not Started</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded" />
@@ -312,7 +318,11 @@ export default function CalendarPage() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-green-100 border border-green-300 rounded" />
-            <span className="text-sm text-gray-600">Done</span>
+            <span className="text-sm text-gray-600">Completed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-yellow-100 border border-yellow-300 rounded" />
+            <span className="text-sm text-gray-600">On Hold</span>
           </div>
         </div>
       </div>

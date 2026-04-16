@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -30,6 +30,10 @@ export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+
+  const prefetchProjects = useCallback(() => {
+    fetch('/api/projects', { method: 'GET' }).catch(() => {});
+  }, []);
 
   const isAdmin = user.role === 'admin';
   const isDeveloper = user.role === 'developer';
@@ -140,6 +144,8 @@ export default function Sidebar({ user }: SidebarProps) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    onMouseEnter={item.href === '/dashboard/projects' ? prefetchProjects : undefined}
+                    onFocus={item.href === '/dashboard/projects' ? prefetchProjects : undefined}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                       isActive 
                         ? 'bg-indigo-50 text-indigo-600' 

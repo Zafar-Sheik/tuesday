@@ -42,10 +42,20 @@ export async function POST(request: NextRequest) {
 
       await setSessionUser(sessionUser);
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         data: sessionUser,
       });
+      
+      response.cookies.set('session', JSON.stringify(sessionUser), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      
+      return response;
     }
 
     // For other users, check database
@@ -76,10 +86,20 @@ export async function POST(request: NextRequest) {
 
     await setSessionUser(sessionUser);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: sessionUser,
     });
+    
+    response.cookies.set('session', JSON.stringify(sessionUser), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
+    
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     
@@ -95,10 +115,20 @@ export async function POST(request: NextRequest) {
 
       await setSessionUser(sessionUser);
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         data: sessionUser,
       });
+      
+      response.cookies.set('session', JSON.stringify(sessionUser), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      
+      return response;
     }
     
     return NextResponse.json(
