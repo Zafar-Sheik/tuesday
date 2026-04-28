@@ -35,12 +35,14 @@ interface Project {
   status: 'not_started' | 'in_progress' | 'completed' | 'on_hold';
   progress: number;
   projectType?: { _id: string; name: string; allowedRoles?: string[] };
-  assignedTo?: { _id: string; name: string; email: string; role: string };
+  assignedTo?: { _id: string; name: string; email: string };
   clientName?: string;
   clientEmail?: string;
   clientPhone?: string;
   clientSignature?: string;
   signedAt?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export default function ProjectDetailPage() {
