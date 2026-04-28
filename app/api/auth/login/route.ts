@@ -5,8 +5,12 @@ import { User } from '@/models/User';
 import { setSessionUser } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
+  let email, password;
+  
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    email = body.email;
+    password = body.password;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -42,10 +46,20 @@ export async function POST(request: NextRequest) {
 
       await setSessionUser(sessionUser);
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         data: sessionUser,
       });
+      
+      response.cookies.set('session', JSON.stringify(sessionUser), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      
+      return response;
     }
 
     // For other users, check database
@@ -76,15 +90,24 @@ export async function POST(request: NextRequest) {
 
     await setSessionUser(sessionUser);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: sessionUser,
     });
+    
+    response.cookies.set('session', JSON.stringify(sessionUser), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
+    
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     
     // If database is not available but credentials match, allow login
-    const { email, password } = await request.json();
     if (email === 'admin@test.com' && password === '123456') {
       const sessionUser = {
         _id: 'hardcoded-admin',
@@ -95,10 +118,20 @@ export async function POST(request: NextRequest) {
 
       await setSessionUser(sessionUser);
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         data: sessionUser,
       });
+      
+      response.cookies.set('session', JSON.stringify(sessionUser), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      
+      return response;
     }
     
     return NextResponse.json(

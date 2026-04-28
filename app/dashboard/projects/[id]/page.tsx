@@ -317,6 +317,9 @@ export default function ProjectDetailPage() {
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{project.name}</h1>
             <p className="text-gray-500">{project.projectType?.name}</p>
+            {project.description && (
+              <p className="text-gray-600 mt-2">{project.description}</p>
+            )}
           </div>
           {user.role === 'admin' && (
             <button onClick={() => setShowEditModal(true)} className="p-2 hover:bg-gray-100 rounded-lg">
@@ -327,7 +330,7 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Project Info Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Status</p>
           <p className="font-semibold text-gray-900 capitalize">{project.status.replace('_', ' ')}</p>
@@ -343,6 +346,14 @@ export default function ProjectDetailPage() {
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Tasks</p>
           <p className="font-semibold text-gray-900">{tasks.length} total</p>
+        </div>
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+          <p className="text-sm text-gray-500 mb-1">Start Date</p>
+          <p className="font-semibold text-gray-900">{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set'}</p>
+        </div>
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+          <p className="text-sm text-gray-500 mb-1">End Date</p>
+          <p className="font-semibold text-gray-900">{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set'}</p>
         </div>
       </div>
 

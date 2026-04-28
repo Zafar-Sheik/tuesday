@@ -3,6 +3,11 @@ import { getSessionUser } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
   try {
+    // Allow access to login page without authentication
+    if (request.nextUrl.pathname === '/login') {
+      return NextResponse.next();
+    }
+
     const user = await getSessionUser();
 
     if (!user) {
@@ -17,5 +22,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/login'],
 };
