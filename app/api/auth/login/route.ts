@@ -5,8 +5,12 @@ import { User } from '@/models/User';
 import { setSessionUser } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
+  let email, password;
+  
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    email = body.email;
+    password = body.password;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -104,7 +108,6 @@ export async function POST(request: NextRequest) {
     console.error('Login error:', error);
     
     // If database is not available but credentials match, allow login
-    const { email, password } = await request.json();
     if (email === 'admin@test.com' && password === '123456') {
       const sessionUser = {
         _id: 'hardcoded-admin',
