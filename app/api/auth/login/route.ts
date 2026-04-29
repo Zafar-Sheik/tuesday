@@ -46,20 +46,10 @@ export async function POST(request: NextRequest) {
 
       await setSessionUser(sessionUser);
 
-      const response = NextResponse.json({
+      return NextResponse.json({
         success: true,
         data: sessionUser,
       });
-      
-      response.cookies.set('session', JSON.stringify(sessionUser), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      });
-      
-      return response;
     }
 
     // For other users, check database
@@ -90,49 +80,29 @@ export async function POST(request: NextRequest) {
 
     await setSessionUser(sessionUser);
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       data: sessionUser,
     });
-    
-    response.cookies.set('session', JSON.stringify(sessionUser), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
-    });
-    
-    return response;
   } catch (error) {
     console.error('Login error:', error);
     
-    // If database is not available but credentials match, allow login
-    if (email === 'admin@test.com' && password === '123456') {
-      const sessionUser = {
-        _id: 'hardcoded-admin',
-        name: 'Admin',
-        email: 'admin@test.com',
-        role: 'admin' as const,
-      };
+     // If database is not available but credentials match, allow login
+     if (email === 'admin@test.com' && password === '123456') {
+       const sessionUser = {
+         _id: 'hardcoded-admin',
+         name: 'Admin',
+         email: 'admin@test.com',
+         role: 'admin' as const,
+       };
 
-      await setSessionUser(sessionUser);
+       await setSessionUser(sessionUser);
 
-      const response = NextResponse.json({
-        success: true,
-        data: sessionUser,
-      });
-      
-      response.cookies.set('session', JSON.stringify(sessionUser), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      });
-      
-      return response;
-    }
+       return NextResponse.json({
+         success: true,
+         data: sessionUser,
+       });
+     }
     
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
