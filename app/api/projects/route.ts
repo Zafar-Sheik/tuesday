@@ -19,16 +19,17 @@ export async function GET(request: NextRequest) {
 
     let query = {};
 
-    
-    if (user.role !== 'admin') {
-      // Get project types accessible to this role
+    // Technicians can only see projects assigned to them
+    if (user.role === 'technician') {
+      query = { assignedTo: user._id };
+    } else if (user.role !== 'admin') {
+      // Developers can see projects of accessible types + assigned to them
       const accessibleTypes = await ProjectType.find({
         allowedRoles: user.role,
       }).select('_id');
-      
+
       const typeIds = accessibleTypes.map(t => t._id);
-      
-      // Non-admin users can only see their own projects or projects of accessible types
+
       query = {
         $or: [
           { assignedTo: user._id },

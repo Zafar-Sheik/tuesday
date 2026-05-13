@@ -10,7 +10,11 @@ import {
   Users, 
   LogOut,
   X,
-  Briefcase
+  Briefcase,
+  Truck,
+  Package,
+  Wrench,
+  Fuel
 } from 'lucide-react';
 
 interface MobileNavProps {
@@ -28,6 +32,7 @@ export default function MobileNav({ user }: MobileNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isAdmin = user.role === 'admin';
+  const isTechnician = user.role === 'technician';
 
   const handleLogout = async () => {
     try {
@@ -40,7 +45,12 @@ export default function MobileNav({ user }: MobileNavProps) {
 
   const menuItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-    { label: 'Projects', icon: FolderKanban, href: '/dashboard/projects' },
+    { label: isTechnician ? 'Daily Route' : 'Projects', icon: FolderKanban, href: '/dashboard/projects' },
+    { label: 'Deliveries', icon: Truck, href: '/dashboard/deliveries' },
+    { label: 'Collections', icon: Package, href: '/dashboard/collections' },
+    { label: 'Job Cards', icon: Package, href: '/dashboard/job-cards' },
+    { label: 'Workshop', icon: Wrench, href: '/dashboard/workshops' },
+    { label: 'Fuel Management', icon: Fuel, href: '/dashboard/fuel-management' },
     { label: 'Calendar', icon: Calendar, href: '/dashboard/calendar' },
     { label: 'Users', icon: Users, href: '/dashboard/users', show: isAdmin },
     { label: 'Project Types', icon: Briefcase, href: '/dashboard/project-types', show: isAdmin },
@@ -61,7 +71,7 @@ export default function MobileNav({ user }: MobileNavProps) {
       {/* Mobile Menu Overlay */}
       {menuOpen && (
         <div className="fixed inset-0 bg-black/50 z-50">
-          <div className="absolute right-0 top-0 bottom-0 w-64 bg-white shadow-xl">
+          <div className="absolute right-0 top-0 bottom-0 w-64 bg-white shadow-xl flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <span className="font-bold text-gray-900">Menu</span>
               <button
@@ -85,8 +95,8 @@ export default function MobileNav({ user }: MobileNavProps) {
               </div>
             </div>
 
-            {/* Menu Items */}
-            <nav className="p-2">
+            {/* Menu Items - scrollable */}
+            <nav className="flex-1 min-h-0 p-2 overflow-y-auto">
               <ul className="space-y-1">
                 {menuItems.map((item) => {
                   if (item.show === false) return null;
@@ -113,7 +123,7 @@ export default function MobileNav({ user }: MobileNavProps) {
             </nav>
 
             {/* Logout */}
-            <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-gray-200">
+            <div className="p-2 border-t border-gray-200">
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-3 px-3 py-2.5 w-full text-red-600 hover:bg-red-50 rounded-lg"

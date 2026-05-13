@@ -323,7 +323,7 @@ export default function ProjectDetailPage() {
               <p className="text-gray-600 mt-2">{project.description}</p>
             )}
           </div>
-          {user.role === 'admin' && (
+          {(user.role === 'admin' || (user.role === 'technician' && project.assignedTo?._id === user?._id)) && (
             <button onClick={() => setShowEditModal(true)} className="p-2 hover:bg-gray-100 rounded-lg">
               <Edit className="w-5 h-5 text-gray-600" />
             </button>

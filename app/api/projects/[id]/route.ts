@@ -12,7 +12,7 @@ export async function GET(
 ) {
   try {
     const user = await getSessionUser();
-    
+
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -33,6 +33,14 @@ export async function GET(
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }
+      );
+    }
+
+    // Technicians can only view projects assigned to them
+    if (user.role === 'technician' && project.assignedTo._id.toString() !== user._id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - You can only view your own projects' },
+        { status: 401 }
       );
     }
 
@@ -72,10 +80,10 @@ export async function PUT(
 ) {
   try {
     const user = await getSessionUser();
-    
-    if (!user || user.role !== 'admin') {
+
+    if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized - Admin only' },
+        { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -101,6 +109,14 @@ export async function PUT(
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }
+      );
+    }
+
+    // Check permissions: admin can edit any, technician can edit only their assigned projects
+    if (user.role !== 'admin' && project.assignedTo._id.toString() !== user._id.toString()) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Can only edit your own projects' },
+        { status: 403 }
       );
     }
 
@@ -140,10 +156,10 @@ export async function DELETE(
 ) {
   try {
     const user = await getSessionUser();
-    
-    if (!user || user.role !== 'admin') {
+
+    if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized - Admin only' },
+        { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -158,6 +174,14 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }
+      );
+    }
+
+    // Check permissions: admin can delete any, technician can delete only their own assigned projects
+    if (user.role !== 'admin' && project.assignedTo._id.toString() !== user._id.toString()) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Can only delete your own projects' },
+        { status: 403 }
       );
     }
 
