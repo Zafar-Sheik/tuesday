@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  FolderKanban, 
-  Plus, 
+import {
+  FolderKanban,
+  Plus,
   Loader2,
   Clock,
   CheckCircle2,
@@ -16,7 +16,8 @@ import {
   Search,
   X,
   Edit,
-  Trash2
+  Trash2,
+  Calendar
 } from 'lucide-react';
 
 interface Project {
@@ -298,7 +299,7 @@ export default function ProjectsPage() {
             <p className="text-gray-500 mt-1">Manage your projects and tasks</p>
           </div>
           
-          {user.role === 'admin' && (
+          {(user.role === 'admin' || user.role === 'technician') && (
             <button
               onClick={() => setShowModal(true)}
               className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
@@ -366,7 +367,7 @@ export default function ProjectsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  {user.role === 'admin' && (
+                  {(user.role === 'admin' || project.assignedTo?._id === user?._id) && (
                     <>
                       <button
                         onClick={(e) => openEditModal(project, e)}
@@ -393,7 +394,7 @@ export default function ProjectsPage() {
                 <p className="text-sm text-gray-600 mb-3 line-clamp-2">{project.description}</p>
               )}
 
-              <div className="mb-3">
+               <div className="mb-3">
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-500">Progress</span>
                   <span className="font-medium text-gray-900">{project.progress}%</span>
@@ -405,6 +406,17 @@ export default function ProjectsPage() {
                   />
                 </div>
               </div>
+
+              {(project.startDate || project.endDate) && (
+                <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                  <Calendar className="w-4 h-4" />
+                  <span>
+                    {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'No start date'}
+                    {' - '}
+                    {project.endDate ? new Date(project.endDate).toLocaleDateString() : 'No end date'}
+                  </span>
+                </div>
+              )}
 
               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div className="flex items-center gap-2">
@@ -427,7 +439,7 @@ export default function ProjectsPage() {
           <p className="text-gray-500 mb-4">
             {searchTerm ? 'Try a different search term' : 'Create your first project to get started'}
           </p>
-          {user.role === 'admin' && !searchTerm && (
+          {(user.role === 'admin' || user.role === 'technician') && !searchTerm && (
             <button
               onClick={() => setShowModal(true)}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"

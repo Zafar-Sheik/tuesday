@@ -20,25 +20,30 @@ export async function GET(request: NextRequest) {
 
     await dbConnect();
 
-    let query: Record<string, unknown> = {};
+    const query: Record<string, unknown> = {};
 
     if (projectId) {
       query.project = projectId;
+    } else if (user.role === 'technician') {
+      // Technicians can only see tasks from their assigned projects
+      const projects = await Project.find({ assignedTo: user._id }).select('_id');
+      const projectIds = projects.map(p => p._id);
+      query.project = { $in: projectIds };
     } else if (user.role !== 'admin') {
       // Get projects accessible to this role
       const accessibleTypes = await ProjectType.find({
         allowedRoles: user.role,
       }).select('_id');
-      
+
       const typeIds = accessibleTypes.map(t => t._id);
-      
+
       const projects = await Project.find({
         $or: [
           { assignedTo: user._id },
           { projectType: { $in: typeIds } }
         ]
       }).select('_id');
-      
+
       const projectIds = projects.map(p => p._id);
       query.project = { $in: projectIds };
     }

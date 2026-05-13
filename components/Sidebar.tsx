@@ -3,18 +3,21 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  FolderKanban, 
-  Calendar, 
-  Users, 
-  Settings, 
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Calendar,
+  Users,
+  Settings,
   ChevronLeft,
   ChevronRight,
   LogOut,
   Briefcase,
   Wrench,
-  Code
+  Code,
+  Truck,
+  Package,
+  Fuel
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -48,38 +51,68 @@ export default function Sidebar({ user }: SidebarProps) {
     }
   };
 
-  const menuItems = [
-    {
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      href: '/dashboard',
-      show: true,
-    },
-    {
-      label: 'Projects',
-      icon: FolderKanban,
-      href: '/dashboard/projects',
-      show: true,
-    },
-    {
-      label: 'Calendar',
-      icon: Calendar,
-      href: '/dashboard/calendar',
-      show: true,
-    },
-    {
-      label: 'Users',
-      icon: Users,
-      href: '/dashboard/users',
-      show: isAdmin,
-    },
-    {
-      label: 'Project Types',
-      icon: Briefcase,
-      href: '/dashboard/project-types',
-      show: isAdmin,
-    },
-  ];
+   const menuItems = [
+     {
+       label: 'Dashboard',
+       icon: LayoutDashboard,
+       href: '/dashboard',
+       show: true,
+     },
+     {
+       label: isTechnician ? 'Daily Route' : 'Projects',
+       icon: FolderKanban,
+       href: '/dashboard/projects',
+       show: true,
+     },
+     {
+       label: 'Deliveries',
+       icon: Truck,
+       href: '/dashboard/deliveries',
+       show: true,
+     },
+     {
+       label: 'Collections',
+       icon: Package,
+       href: '/dashboard/collections',
+       show: true,
+     },
+     {
+       label: 'Job Cards',
+       icon: Package,
+       href: '/dashboard/job-cards',
+       show: true,
+     },
+     {
+       label: 'Workshop',
+       icon: Wrench,
+       href: '/dashboard/workshops',
+       show: true,
+     },
+     {
+       label: 'Fuel Management',
+       icon: Fuel,
+       href: '/dashboard/fuel-management',
+       show: true,
+     },
+     {
+       label: 'Calendar',
+       icon: Calendar,
+       href: '/dashboard/calendar',
+       show: true,
+     },
+     {
+       label: 'Users',
+       icon: Users,
+       href: '/dashboard/users',
+       show: isAdmin,
+     },
+     {
+       label: 'Project Types',
+       icon: Briefcase,
+       href: '/dashboard/project-types',
+       show: isAdmin,
+     },
+   ];
 
   const roleIcon = isAdmin ? Settings : isDeveloper ? Code : Wrench;
   const RoleIcon = roleIcon;
@@ -95,7 +128,7 @@ export default function Sidebar({ user }: SidebarProps) {
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           {!collapsed && (
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-linear-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <FolderKanban className="w-5 h-5 text-white" />
               </div>
               <span className="font-bold text-gray-900">PM System</span>
@@ -116,7 +149,7 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* User Info */}
         <div className="p-4 border-b border-gray-200">
           <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+            <div className="w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
               {user.name.charAt(0).toUpperCase()}
             </div>
             {!collapsed && (
@@ -132,7 +165,7 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
 
         {/* Menu Items */}
-        <nav className="flex-1 p-2 overflow-y-auto">
+        <nav className="flex-1 min-h-0 p-2 overflow-y-auto">
           <ul className="space-y-1">
             {menuItems.map((item) => {
               if (!item.show) return null;

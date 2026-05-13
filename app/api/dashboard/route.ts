@@ -23,12 +23,15 @@ export async function GET(request: NextRequest) {
     let projectQuery = {};
     let accessibleTypeIds: string[] = [];
 
-    if (user.role !== 'admin') {
+    if (user.role === 'technician') {
+      // Technicians only see their own projects
+      projectQuery = { assignedTo: user._id };
+    } else if (user.role !== 'admin') {
       const accessibleTypes = await ProjectType.find({
         allowedRoles: user.role,
       }).select('_id');
       accessibleTypeIds = accessibleTypes.map(t => t._id.toString());
-      
+
       projectQuery = {
         $or: [
           { assignedTo: user._id },
@@ -45,7 +48,11 @@ export async function GET(request: NextRequest) {
 
     // Get tasks
     let taskQuery = {};
-    if (user.role !== 'admin' && accessibleTypeIds.length > 0) {
+    if (user.role === 'technician') {
+      const userProjects = await Project.find({ assignedTo: user._id }).select('_id');
+      const projectIds = userProjects.map(p => p._id);
+      taskQuery = { project: { $in: projectIds } };
+    } else if (user.role !== 'admin' && accessibleTypeIds.length > 0) {
       const userProjects = await Project.find({
         $or: [
           { assignedTo: user._id },
