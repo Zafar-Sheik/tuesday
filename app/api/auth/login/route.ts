@@ -2,11 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/db';
 import { User } from '@/models/User';
-import { setSessionUser } from '@/lib/auth';
+import { SessionUser } from '@/types';
+
+const SESSION_COOKIE = 'session';
+
+function setSessionCookie(response: NextResponse, user: SessionUser) {
+  response.cookies.set(SESSION_COOKIE, JSON.stringify(user), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: '/',
+  });
+}
 
 export async function POST(request: NextRequest) {
   let email, password;
-  
+
   try {
     const body = await request.json();
     email = body.email;
@@ -25,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (email === 'admin@test.com' && password === '123456') {
       // Check if admin user exists in database
       let user = await User.findOne({ email: 'admin@test.com' });
-      
+
       if (!user) {
         // Create admin user if not exists
         const hashedPassword = await bcrypt.hash('123456', 12);
@@ -44,12 +56,12 @@ export async function POST(request: NextRequest) {
         role: user.role,
       };
 
-      await setSessionUser(sessionUser);
-
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         data: sessionUser,
       });
+      setSessionCookie(response, sessionUser);
+      return response;
     }
 
     // For other users, check database
@@ -78,32 +90,32 @@ export async function POST(request: NextRequest) {
       role: user.role,
     };
 
-    await setSessionUser(sessionUser);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: sessionUser,
     });
+    setSessionCookie(response, sessionUser);
+    return response;
   } catch (error) {
     console.error('Login error:', error);
-    
-     // If database is not available but credentials match, allow login
-     if (email === 'admin@test.com' && password === '123456') {
-       const sessionUser = {
-         _id: 'hardcoded-admin',
-         name: 'Admin',
-         email: 'admin@test.com',
-         role: 'admin' as const,
-       };
 
-       await setSessionUser(sessionUser);
+    // If database is not available but credentials match, allow login
+    if (email === 'admin@test.com' && password === '123456') {
+      const sessionUser = {
+        _id: 'hardcoded-admin',
+        name: 'Admin',
+        email: 'admin@test.com',
+        role: 'admin' as const,
+      };
 
-       return NextResponse.json({
-         success: true,
-         data: sessionUser,
-       });
-     }
-    
+      const response = NextResponse.json({
+        success: true,
+        data: sessionUser,
+      });
+      setSessionCookie(response, sessionUser);
+      return response;
+    }
+
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

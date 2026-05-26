@@ -249,168 +249,168 @@ export default function WorkshopsPage() {
       w.technician?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-  if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-      </div>
-    );
-  }
+   if (loading || !user) {
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-slate-950">
+         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+       </div>
+     );
+   }
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Workshop</h1>
-            <p className="text-gray-500 mt-1">Track and manage workshop repair items</p>
-          </div>
+       {/* Header */}
+       <div className="mb-6">
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+           <div>
+             <h1 className="text-2xl md:text-3xl font-bold text-slate-100">Workshop</h1>
+             <p className="text-slate-400 mt-1">Track and manage workshop repair items</p>
+           </div>
 
-          {(isAdmin || user?.role === 'technician') && (
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              <span>New Workshop Item</span>
-            </button>
-          )}
-        </div>
-      </div>
+           {(isAdmin || user?.role === 'technician') && (
+             <button
+               onClick={() => setShowModal(true)}
+               className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+             >
+               <Plus className="w-5 h-5" />
+               <span>New Workshop Item</span>
+             </button>
+           )}
+         </div>
+       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by client, item, fault, or technician..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          />
-        </div>
+       {/* Search and Filters */}
+       <div className="flex flex-col md:flex-row gap-4 mb-6">
+         <div className="relative flex-1">
+           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+           <input
+             type="text"
+             placeholder="Search by client, item, fault, or technician..."
+             value={searchTerm}
+             onChange={(e) => setSearchTerm(e.target.value)}
+             className="w-full pl-10 pr-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100 placeholder:text-slate-500"
+           />
+         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-          {[
-            { value: 'all', label: 'All' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'complete', label: 'Completed' }
-          ].map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value as typeof filter)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                filter === f.value
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
+         <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+           {[
+             { value: 'all', label: 'All' },
+             { value: 'pending', label: 'Pending' },
+             { value: 'complete', label: 'Completed' }
+           ].map((f) => (
+             <button
+               key={f.value}
+               onClick={() => setFilter(f.value as typeof filter)}
+               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                 filter === f.value
+                   ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white'
+                   : 'glass text-slate-300 hover:bg-slate-800/50 border border-slate-700/50'
+               }`}
+             >
+               {f.label}
+             </button>
+           ))}
+         </div>
+       </div>
 
       {/* Workshops Grid */}
       {filteredWorkshops.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredWorkshops.map((workshop) => (
-            <div
-              key={workshop._id}
-              onClick={() => openViewModal(workshop)}
-              className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                    <Wrench className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 truncate max-w-[140px]">{workshop.itemBookedIn}</h3>
-                    <p className="text-xs text-gray-500">{new Date(workshop.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  {(isAdmin || user?._id === workshop.technician?._id) && (
-                    <>
-                      <button
-                        onClick={(e) => openEditModal(workshop, e)}
-                        className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => handleDeleteWorkshop(workshop._id, e)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </>
-                  )}
-                  <span className={`ml-1 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${workshop.complete ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                    {workshop.complete ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                    {workshop.complete ? 'Completed' : 'Pending'}
-                  </span>
-                </div>
-              </div>
+         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {filteredWorkshops.map((workshop) => (
+             <div
+               key={workshop._id}
+               onClick={() => openViewModal(workshop)}
+               className="glass rounded-2xl p-4 md:p-6 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all cursor-pointer"
+             >
+               <div className="flex items-start justify-between mb-3">
+                 <div className="flex items-center gap-2">
+                   <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center">
+                     <Wrench className="w-5 h-5 text-amber-500" />
+                   </div>
+                   <div>
+                     <h3 className="font-semibold text-slate-100 truncate max-w-[140px]">{workshop.itemBookedIn}</h3>
+                     <p className="text-xs text-slate-400">{new Date(workshop.createdAt).toLocaleDateString()}</p>
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-1">
+                   {(isAdmin || user?._id === workshop.technician?._id) && (
+                     <>
+                       <button
+                         onClick={(e) => openEditModal(workshop, e)}
+                         className="p-1.5 text-slate-400 hover:bg-slate-800/50 rounded-lg transition-all"
+                       >
+                         <Edit className="w-4 h-4" />
+                       </button>
+                       <button
+                         onClick={(e) => handleDeleteWorkshop(workshop._id, e)}
+                         className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </button>
+                     </>
+                   )}
+                   <span className={`ml-1 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${workshop.complete ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
+                     {workshop.complete ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                     {workshop.complete ? 'Completed' : 'Pending'}
+                   </span>
+                 </div>
+               </div>
 
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <UserIcon className="w-4 h-4 text-gray-400" />
-                  <span className="truncate">{workshop.client}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <FileText className="w-4 h-4 text-gray-400" />
-                  <span className="truncate">{workshop.faultOfItem}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Wrench className="w-4 h-4 text-gray-400" />
-                  <span className="truncate">{workshop.workScope}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <UserIcon className="w-4 h-4 text-gray-400" />
-                  <span>{workshop.technician?.name || 'Unassigned'}</span>
-                </div>
-                {workshop.image && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <ImageIcon className="w-4 h-4 text-gray-400" />
-                    <span className="text-xs text-gray-400">Photo attached</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+               <div className="space-y-2 text-sm">
+                 <div className="flex items-center gap-2 text-slate-300">
+                   <UserIcon className="w-4 h-4 text-slate-400" />
+                   <span className="truncate">{workshop.client}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-slate-300">
+                   <FileText className="w-4 h-4 text-slate-400" />
+                   <span className="truncate">{workshop.faultOfItem}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-slate-300">
+                   <Wrench className="w-4 h-4 text-slate-400" />
+                   <span className="truncate">{workshop.workScope}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-slate-300">
+                   <UserIcon className="w-4 h-4 text-slate-400" />
+                   <span>{workshop.technician?.name || 'Unassigned'}</span>
+                 </div>
+                 {workshop.image && (
+                   <div className="flex items-center gap-2 text-slate-300">
+                     <ImageIcon className="w-4 h-4 text-slate-400" />
+                     <span className="text-xs text-slate-400">Photo attached</span>
+                   </div>
+                 )}
+               </div>
+             </div>
+           ))}
+         </div>
       ) : (
-        <div className="text-center py-12">
-          <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No workshop items found</h3>
-          <p className="text-gray-500 mb-4">
-            {searchTerm ? 'Try a different search term' : 'Create your first workshop item to get started'}
-          </p>
-          {(isAdmin || user?.role === 'technician') && !searchTerm && (
-            <button
-              onClick={() => setShowModal(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            >
-              Create Workshop Item
-            </button>
-          )}
-        </div>
+          <div className="text-center py-12">
+           <Wrench className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+           <h3 className="text-lg font-semibold text-slate-100 mb-2">No workshop items found</h3>
+           <p className="text-slate-400 mb-4">
+             {searchTerm ? 'Try a different search term' : 'Create your first workshop item to get started'}
+           </p>
+           {(isAdmin || user?.role === 'technician') && !searchTerm && (
+             <button
+               onClick={() => setShowModal(true)}
+               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+             >
+               Create Workshop Item
+             </button>
+           )}
+         </div>
       )}
 
-      {/* Create Workshop Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-4 md:p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Create New Workshop Item</h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
+       {/* Create Workshop Modal */}
+       {showModal && (
+         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+           <div className="glass rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+             <div className="p-4 md:p-6 border-b border-slate-700/50 flex items-center justify-between">
+               <h2 className="text-xl font-bold text-slate-100">Create New Workshop Item</h2>
+               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-800/50 rounded-lg transition-all">
+                 <X className="w-5 h-5 text-slate-400" />
+               </button>
+             </div>
 
             <form onSubmit={handleCreateWorkshop} className="p-4 md:p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">

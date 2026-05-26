@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/auth';
+import { SessionUser } from '@/types';
+
+const SESSION_COOKIE = 'session';
+
+function getSessionUserFromRequest(request: NextRequest): SessionUser | null {
+  const sessionCookie = request.cookies.get(SESSION_COOKIE);
+
+  if (!sessionCookie?.value) {
+    return null;
+  }
+
+  try {
+    const user = JSON.parse(sessionCookie.value) as SessionUser;
+    return user;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getSessionUser();
+    const user = getSessionUserFromRequest(request);
 
     if (!user) {
       return NextResponse.json(

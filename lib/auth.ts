@@ -24,7 +24,7 @@ export async function setSessionUser(user: SessionUser): Promise<void> {
   cookieStore.set(SESSION_COOKIE, JSON.stringify(user), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',
   });

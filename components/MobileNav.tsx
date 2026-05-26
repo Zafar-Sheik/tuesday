@@ -3,18 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  FolderKanban, 
-  Calendar, 
-  Users, 
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Calendar,
+  Users,
   LogOut,
   X,
   Briefcase,
   Truck,
   Package,
   Wrench,
-  Fuel
+  Fuel,
+  Clock,
+  Settings
 } from 'lucide-react';
 
 interface MobileNavProps {
@@ -36,7 +38,7 @@ export default function MobileNav({ user }: MobileNavProps) {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
       router.push('/login');
     } catch (error) {
       console.error('Logout error:', error);
@@ -45,15 +47,15 @@ export default function MobileNav({ user }: MobileNavProps) {
 
   const menuItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-    { label: isTechnician ? 'Daily Route' : 'Projects', icon: FolderKanban, href: '/dashboard/projects' },
+    { label: isTechnician ? 'My Tasks' : 'Projects', icon: FolderKanban, href: '/dashboard/projects' },
     { label: 'Deliveries', icon: Truck, href: '/dashboard/deliveries' },
     { label: 'Collections', icon: Package, href: '/dashboard/collections' },
-    { label: 'Job Cards', icon: Package, href: '/dashboard/job-cards' },
+    { label: 'Job Cards', icon: Briefcase, href: '/dashboard/job-cards' },
     { label: 'Workshop', icon: Wrench, href: '/dashboard/workshops' },
-    { label: 'Fuel Management', icon: Fuel, href: '/dashboard/fuel-management' },
+    { label: 'Fuel', icon: Fuel, href: '/dashboard/fuel-management' },
     { label: 'Calendar', icon: Calendar, href: '/dashboard/calendar' },
     { label: 'Users', icon: Users, href: '/dashboard/users', show: isAdmin },
-    { label: 'Project Types', icon: Briefcase, href: '/dashboard/project-types', show: isAdmin },
+    { label: 'Project Types', icon: Settings, href: '/dashboard/project-types', show: isAdmin },
   ];
 
   return (
@@ -61,41 +63,44 @@ export default function MobileNav({ user }: MobileNavProps) {
       {/* Menu Button */}
       <button
         onClick={() => setMenuOpen(true)}
-        className="fixed top-4 right-4 z-40 p-2 bg-white rounded-lg shadow-md"
+        className="fixed top-4 right-4 z-40 p-3 bg-slate-800/90 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-lg text-slate-200 hover:text-white hover:bg-slate-700/90 transition-all md:hidden"
       >
-        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
 
       {/* Mobile Menu Overlay */}
       {menuOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50">
-          <div className="absolute right-0 top-0 bottom-0 w-64 bg-white shadow-xl flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <span className="font-bold text-gray-900">Menu</span>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 md:hidden" onClick={() => setMenuOpen(false)}>
+          <div
+            className="absolute right-0 top-0 bottom-0 w-72 bg-slate-900 shadow-2xl flex flex-col border-l border-slate-700/50"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+              <span className="font-bold text-slate-100 text-lg">Menu</span>
               <button
                 onClick={() => setMenuOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-100"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             {/* User Info */}
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b border-slate-700/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-slate-100 truncate">{user.name}</p>
+                  <p className="text-xs text-slate-400 capitalize">{user.role}</p>
                 </div>
               </div>
             </div>
 
-            {/* Menu Items - scrollable */}
+            {/* Menu Items */}
             <nav className="flex-1 min-h-0 p-2 overflow-y-auto">
               <ul className="space-y-1">
                 {menuItems.map((item) => {
@@ -107,10 +112,10 @@ export default function MobileNav({ user }: MobileNavProps) {
                       <Link
                         href={item.href}
                         onClick={() => setMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg ${
-                          isActive 
-                            ? 'bg-indigo-50 text-indigo-600' 
-                            : 'text-gray-600'
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                          isActive
+                            ? 'bg-gradient-to-r from-blue-600/30 to-violet-600/30 text-blue-400 border border-blue-500/30'
+                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
                         }`}
                       >
                         <Icon className="w-5 h-5" />
@@ -123,10 +128,10 @@ export default function MobileNav({ user }: MobileNavProps) {
             </nav>
 
             {/* Logout */}
-            <div className="p-2 border-t border-gray-200">
+            <div className="p-2 border-t border-slate-700/50">
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-3 py-2.5 w-full text-red-600 hover:bg-red-50 rounded-lg"
+                className="flex items-center gap-3 px-4 py-3 w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 <span className="font-medium">Logout</span>
