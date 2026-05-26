@@ -302,88 +302,88 @@ export default function ProjectDetailPage() {
 
   if (loading || !user || !project) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
     );
   }
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-4">
-          <button onClick={() => router.push('/dashboard/projects')} className="p-2 hover:bg-gray-100 rounded-lg">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{project.name}</h1>
-            <p className="text-gray-500">{project.projectType?.name}</p>
-            {project.description && (
-              <p className="text-gray-600 mt-2">{project.description}</p>
-            )}
-          </div>
-          {(user.role === 'admin' || (user.role === 'technician' && project.assignedTo?._id === user?._id)) && (
-            <button onClick={() => setShowEditModal(true)} className="p-2 hover:bg-gray-100 rounded-lg">
-              <Edit className="w-5 h-5 text-gray-600" />
-            </button>
-          )}
-        </div>
-      </div>
+       {/* Header */}
+       <div className="mb-6">
+         <div className="flex items-center gap-4">
+           <button onClick={() => router.push('/dashboard/projects')} className="p-2 hover:bg-slate-800/50 rounded-lg transition-all">
+             <ArrowLeft className="w-5 h-5 text-slate-300" />
+           </button>
+           <div className="flex-1">
+             <h1 className="text-2xl md:text-3xl font-bold text-slate-100">{project.name}</h1>
+             <p className="text-slate-400">{project.projectType?.name}</p>
+             {project.description && (
+               <p className="text-slate-300 mt-2">{project.description}</p>
+             )}
+           </div>
+           {(user.role === 'admin' || (user.role === 'technician' && project.assignedTo?._id === user?._id)) && (
+             <button onClick={() => setShowEditModal(true)} className="p-2 hover:bg-slate-800/50 rounded-lg transition-all">
+               <Edit className="w-5 h-5 text-slate-300" />
+             </button>
+           )}
+         </div>
+       </div>
 
       {/* Project Info Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Status</p>
-          <p className="font-semibold text-gray-900 capitalize">{project.status.replace('_', ' ')}</p>
+        <div className="glass rounded-2xl p-4">
+          <p className="text-sm text-slate-400 mb-1">Status</p>
+          <p className="font-semibold text-slate-100 capitalize">{project.status.replace('_', ' ')}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Progress</p>
-          <p className="font-semibold text-gray-900">{project.progress}%</p>
+        <div className="glass rounded-2xl p-4">
+          <p className="text-sm text-slate-400 mb-1">Progress</p>
+          <p className="font-semibold text-slate-100">{project.progress}%</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Assigned To</p>
-          <p className="font-semibold text-gray-900">{project.assignedTo?.name || 'Unassigned'}</p>
+        <div className="glass rounded-2xl p-4">
+          <p className="text-sm text-slate-400 mb-1">Assigned To</p>
+          <p className="font-semibold text-slate-100">{project.assignedTo?.name || 'Unassigned'}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Tasks</p>
-          <p className="font-semibold text-gray-900">{tasks.length} total</p>
+        <div className="glass rounded-2xl p-4">
+          <p className="text-sm text-slate-400 mb-1">Tasks</p>
+          <p className="font-semibold text-slate-100">{tasks.length} total</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Start Date</p>
-          <p className="font-semibold text-gray-900">{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set'}</p>
+        <div className="glass rounded-2xl p-4">
+          <p className="text-sm text-slate-400 mb-1">Start Date</p>
+          <p className="font-semibold text-slate-100">{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set'}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">End Date</p>
-          <p className="font-semibold text-gray-900">{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set'}</p>
+        <div className="glass rounded-2xl p-4">
+          <p className="text-sm text-slate-400 mb-1">End Date</p>
+          <p className="font-semibold text-slate-100">{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set'}</p>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6">
+      <div className="glass rounded-2xl p-4 mb-6">
         <div className="flex justify-between text-sm mb-2">
-          <span className="text-gray-600">Overall Progress</span>
-          <span className="font-semibold text-gray-900">{project.progress}%</span>
+          <span className="text-slate-400">Overall Progress</span>
+          <span className="font-semibold text-slate-100">{project.progress}%</span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-3">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full" style={{ width: `${project.progress}%` }} />
+        <div className="w-full bg-slate-700/50 rounded-full h-3">
+          <div className="bg-gradient-to-r from-blue-500 to-violet-500 h-3 rounded-full transition-all duration-500" style={{ width: `${project.progress}%` }} />
         </div>
       </div>
 
       {/* Kanban Board */}
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Tasks</h2>
-        <button onClick={() => setShowTaskModal(true)} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm">
+        <h2 className="text-lg font-semibold text-slate-100">Tasks</h2>
+        <button onClick={() => setShowTaskModal(true)} className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg text-sm btn-shine hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all">
           <Plus className="w-4 h-4" /> Add Task
         </button>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4 md:gap-6 mb-6">
-        <div className="bg-gray-50 rounded-2xl p-4">
+        <div className="glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-5 h-5 text-gray-500" />
-            <h3 className="font-semibold text-gray-900">To Do</h3>
-            <span className="ml-auto bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs">{todoTasks.length}</span>
+            <Clock className="w-5 h-5 text-slate-400" />
+            <h3 className="font-semibold text-slate-100">To Do</h3>
+            <span className="ml-auto bg-slate-700/50 text-slate-200 px-2 py-0.5 rounded-full text-xs">{todoTasks.length}</span>
           </div>
           <div className="space-y-3">
             {todoTasks.map(task => (
@@ -392,11 +392,11 @@ export default function ProjectDetailPage() {
           </div>
         </div>
 
-        <div className="bg-blue-50 rounded-2xl p-4">
+        <div className="glass rounded-2xl p-4 border-blue-500/20">
           <div className="flex items-center gap-2 mb-4">
             <PlayCircle className="w-5 h-5 text-blue-500" />
-            <h3 className="font-semibold text-gray-900">In Progress</h3>
-            <span className="ml-auto bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full text-xs">{inProgressTasks.length}</span>
+            <h3 className="font-semibold text-slate-100">In Progress</h3>
+            <span className="ml-auto bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full text-xs">{inProgressTasks.length}</span>
           </div>
           <div className="space-y-3">
             {inProgressTasks.map(task => (
@@ -405,11 +405,11 @@ export default function ProjectDetailPage() {
           </div>
         </div>
 
-        <div className="bg-green-50 rounded-2xl p-4">
+        <div className="glass rounded-2xl p-4 border-emerald-500/20">
           <div className="flex items-center gap-2 mb-4">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <h3 className="font-semibold text-gray-900">Done</h3>
-            <span className="ml-auto bg-green-200 text-green-700 px-2 py-0.5 rounded-full text-xs">{doneTasks.length}</span>
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            <h3 className="font-semibold text-slate-100">Done</h3>
+            <span className="ml-auto bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-xs">{doneTasks.length}</span>
           </div>
           <div className="space-y-3">
             {doneTasks.map(task => (
@@ -421,23 +421,23 @@ export default function ProjectDetailPage() {
 
       {/* Client Sign-off Section */}
       {project.projectType?.allowedRoles?.includes('technician') && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Client Sign-off</h2>
+        <div className="glass rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-slate-100 mb-4">Client Sign-off</h2>
           {project.clientSignature ? (
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-6 h-6 text-green-500" />
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               <div>
-                <p className="font-medium text-gray-900">Job Completed</p>
-                <p className="text-sm text-gray-500">Signed on {new Date(project.signedAt || '').toLocaleDateString()}</p>
-                <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded">
+                <p className="font-medium text-slate-100">Job Completed</p>
+                <p className="text-sm text-slate-400">Signed on {new Date(project.signedAt || '').toLocaleDateString()}</p>
+                <div className="mt-2 p-2 bg-slate-800/50 border border-slate-700/50 rounded">
                   <img src={project.clientSignature} alt="Client signature" className="h-16 object-contain" />
                 </div>
               </div>
             </div>
           ) : (
             <div>
-              <p className="text-gray-600 mb-4">Please sign below to confirm job completion:</p>
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
+              <p className="text-slate-300 mb-4">Please sign below to confirm job completion:</p>
+              <div className="border-2 border-dashed border-slate-700/50 rounded-xl p-4 bg-slate-800/30">
                 <canvas
                   ref={canvasRef}
                   onMouseDown={startDrawing}
@@ -447,19 +447,19 @@ export default function ProjectDetailPage() {
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchDraw}
                   onTouchEnd={stopDrawing}
-                  className="w-full h-40 bg-white border border-gray-200 rounded-lg touch-none cursor-crosshair"
+                  className="w-full h-40 bg-slate-900 border border-slate-700/50 rounded-lg touch-none cursor-crosshair"
                   style={{ touchAction: 'none' }}
                 />
               </div>
               <div className="flex gap-2 mt-3">
-                <button type="button" onClick={clearSignature} className="px-3 py-2 text-sm border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={clearSignature} className="px-3 py-2 text-sm border border-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-800/50 transition-all">
                   Clear
                 </button>
-                <button type="button" onClick={saveSignature} disabled={!hasDrawn} className="px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                <button type="button" onClick={saveSignature} disabled={!hasDrawn} className="px-3 py-2 text-sm bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all disabled:opacity-50">
                   Sign & Complete
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">Draw your signature using mouse or touch</p>
+              <p className="text-xs text-slate-400 mt-2">Draw your signature using mouse or touch</p>
             </div>
           )}
         </div>
@@ -467,40 +467,40 @@ export default function ProjectDetailPage() {
 
       {/* Create Task Modal */}
       {showTaskModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg">
-            <div className="p-4 md:p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Add New Task</h2>
-              <button onClick={() => setShowTaskModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5 text-gray-500" />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+          <div className="glass rounded-2xl w-full max-w-lg">
+            <div className="p-4 md:p-6 border-b border-slate-700/50 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-100">Add New Task</h2>
+              <button onClick={() => setShowTaskModal(false)} className="p-2 hover:bg-slate-800/50 rounded-lg transition-all">
+                <X className="w-5 h-5 text-slate-400" />
               </button>
             </div>
             <form onSubmit={handleCreateTask} className="p-4 md:p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
-                <input type="text" value={newTask.title} onChange={(e) => setNewTask({...newTask, title: e.target.value})} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" required />
+                <label className="block text-sm font-medium text-slate-300 mb-1">Task Title</label>
+                <input type="text" value={newTask.title} onChange={(e) => setNewTask({...newTask, title: e.target.value})} className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea value={newTask.description} onChange={(e) => setNewTask({...newTask, description: e.target.value})} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" rows={3} />
+                <label className="block text-sm font-medium text-slate-300 mb-1">Description</label>
+                <textarea value={newTask.description} onChange={(e) => setNewTask({...newTask, description: e.target.value})} className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100" rows={3} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                <input type="date" value={newTask.date} onChange={(e) => setNewTask({...newTask, date: e.target.value})} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" required />
+                <label className="block text-sm font-medium text-slate-300 mb-1">Date</label>
+                <input type="date" value={newTask.date} onChange={(e) => setNewTask({...newTask, date: e.target.value})} className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100" required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                  <input type="time" value={newTask.startTime} onChange={(e) => setNewTask({...newTask, startTime: e.target.value})} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" required />
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Start Time</label>
+                  <input type="time" value={newTask.startTime} onChange={(e) => setNewTask({...newTask, startTime: e.target.value})} className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                  <input type="time" value={newTask.endTime} onChange={(e) => setNewTask({...newTask, endTime: e.target.value})} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" required />
+                  <label className="block text-sm font-medium text-slate-300 mb-1">End Time</label>
+                  <input type="time" value={newTask.endTime} onChange={(e) => setNewTask({...newTask, endTime: e.target.value})} className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100" required />
                 </div>
               </div>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowTaskModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl">Create Task</button>
+                <button type="button" onClick={() => setShowTaskModal(false)} className="flex-1 px-4 py-2.5 border border-slate-700/50 text-slate-300 rounded-xl hover:bg-slate-800/50 transition-all">Cancel</button>
+                <button type="submit" className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all">Create Task</button>
               </div>
             </form>
           </div>
@@ -509,18 +509,18 @@ export default function ProjectDetailPage() {
 
       {/* Edit Project Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg">
-            <div className="p-4 md:p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Edit Project</h2>
-              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5 text-gray-500" />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+          <div className="glass rounded-2xl w-full max-w-lg">
+            <div className="p-4 md:p-6 border-b border-slate-700/50 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-100">Edit Project</h2>
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-slate-800/50 rounded-lg transition-all">
+                <X className="w-5 h-5 text-slate-400" />
               </button>
             </div>
             <form onSubmit={handleUpdateProject} className="p-4 md:p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select value={project.status} onChange={(e) => setProject({...project, status: e.target.value as Project['status']})} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500">
+                <label className="block text-sm font-medium text-slate-300 mb-1">Status</label>
+                <select value={project.status} onChange={(e) => setProject({...project, status: e.target.value as Project['status']})} className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100">
                   <option value="not_started">Not Started</option>
                   <option value="in_progress">In Progress</option>
                   <option value="completed">Completed</option>
@@ -528,8 +528,8 @@ export default function ProjectDetailPage() {
                 </select>
               </div>
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowEditModal(false)} className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl">Save Changes</button>
+                <button type="button" onClick={() => setShowEditModal(false)} className="flex-1 px-4 py-2.5 border border-slate-700/50 text-slate-300 rounded-xl hover:bg-slate-800/50 transition-all">Cancel</button>
+                <button type="submit" className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all">Save Changes</button>
               </div>
             </form>
           </div>
@@ -543,22 +543,36 @@ function TaskCard({ task, onStatusChange, onDelete }: { task: Task; onStatusChan
   const [showMenu, setShowMenu] = useState(false);
   const getNextStatus = (current: string) => current === 'todo' ? 'in_progress' : current === 'in_progress' ? 'done' : 'done';
 
+  const statusColors = {
+    todo: 'bg-slate-700/50 text-slate-200',
+    in_progress: 'bg-blue-500/20 text-blue-300',
+    done: 'bg-emerald-500/20 text-emerald-300'
+  };
+
+  const statusLabels = {
+    todo: 'To Do',
+    in_progress: 'In Progress',
+    done: 'Done'
+  };
+
   return (
-    <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+    <div className="glass rounded-xl p-3 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all">
       <div className="flex items-start justify-between">
-        <h4 className="font-medium text-gray-900 text-sm">{task.title}</h4>
+        <h4 className="font-medium text-slate-100 text-sm">{task.title}</h4>
         <div className="relative">
-          <button onClick={() => setShowMenu(!showMenu)} className="p-1 hover:bg-gray-100 rounded"><MoreVertical className="w-4 h-4 text-gray-400" /></button>
+          <button onClick={() => setShowMenu(!showMenu)} className="p-1 hover:bg-slate-800/50 rounded transition-all">
+            <MoreVertical className="w-4 h-4 text-slate-400" />
+          </button>
           {showMenu && (
-            <div className="absolute right-0 top-6 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
-              <button onClick={() => { onStatusChange(task._id, getNextStatus(task.status)); setShowMenu(false); }} className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50">Move to {getNextStatus(task.status).replace('_', ' ')}</button>
-              <button onClick={() => { onDelete(task._id); setShowMenu(false); }} className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">Delete</button>
+            <div className="absolute right-0 top-6 glass rounded-lg shadow-lg z-10 w-32 border border-slate-700/50">
+              <button onClick={() => { onStatusChange(task._id, getNextStatus(task.status)); setShowMenu(false); }} className="w-full px-3 py-2 text-left text-sm hover:bg-slate-800/50 text-slate-300 transition-all">Move to {statusLabels[getNextStatus(task.status) as keyof typeof statusLabels]}</button>
+              <button onClick={() => { onDelete(task._id); setShowMenu(false); }} className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 transition-all">Delete</button>
             </div>
           )}
         </div>
       </div>
-      {task.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{task.description}</p>}
-      <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+      {task.description && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{task.description}</p>}
+      <div className="flex items-center gap-2 mt-2 text-xs text-slate-400">
         <span>{new Date(task.date).toLocaleDateString()}</span>
         <span>•</span>
         <span>{task.startTime} - {task.endTime}</span>

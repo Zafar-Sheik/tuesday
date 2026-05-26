@@ -9,6 +9,7 @@ import {
   Loader2,
   Clock,
   PlayCircle,
+  PauseCircle,
   CheckCircle2,
   Calendar as CalendarIcon
 } from 'lucide-react';
@@ -55,8 +56,9 @@ export default function CalendarPage() {
   }, [user, authLoading, router]);
 
   const fetchProjects = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/projects');
+      const res = await fetch('/api/projects?sortBy=dueDate&sortOrder=asc');
       const data = await res.json();
       if (data.success) {
         setProjects(data.data);
@@ -123,30 +125,30 @@ export default function CalendarPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'not_started':
-        return 'bg-gray-100 border-gray-300';
+        return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
       case 'in_progress':
-        return 'bg-blue-100 border-blue-300';
+        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       case 'completed':
-        return 'bg-green-100 border-green-300';
+        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
       case 'on_hold':
-        return 'bg-yellow-100 border-yellow-300';
+        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
       default:
-        return 'bg-gray-100 border-gray-300';
+        return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'not_started':
-        return <Clock className="w-3 h-3 text-gray-500" />;
+        return <Clock className="w-3 h-3 text-slate-400" />;
       case 'in_progress':
-        return <PlayCircle className="w-3 h-3 text-blue-500" />;
+        return <PlayCircle className="w-3 h-3 text-blue-400" />;
       case 'completed':
-        return <CheckCircle2 className="w-3 h-3 text-green-500" />;
+        return <CheckCircle2 className="w-3 h-3 text-emerald-400" />;
       case 'on_hold':
-        return <Clock className="w-3 h-3 text-yellow-500" />;
+        return <PauseCircle className="w-3 h-3 text-amber-400" />;
       default:
-        return <Clock className="w-3 h-3 text-gray-500" />;
+        return <Clock className="w-3 h-3 text-slate-400" />;
     }
   };
 
@@ -155,8 +157,8 @@ export default function CalendarPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -167,76 +169,76 @@ export default function CalendarPage() {
       <div className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Calendar</h1>
-            <p className="text-gray-500 mt-1">View project due dates</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-100">Calendar</h1>
+            <p className="text-slate-400 mt-1">View project due dates</p>
           </div>
-          
+
           <button
             onClick={goToToday}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:from-blue-700 hover:to-violet-700 transition-all shadow-lg shadow-blue-500/25"
           >
             Today
           </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Calendar */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
+        <div className="lg:col-span-2 bg-slate-900 border border-slate-700/50 rounded-2xl p-3 md:p-6 shadow-2xl overflow-x-auto">
           {/* Calendar Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-base md:text-xl font-bold text-slate-100">
               {MONTHS[currentDate.getMonth()]} {currentDate.getFullYear()}
             </h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={goToPreviousMonth}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-100 transition-colors"
               >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={goToNextMonth}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-100 transition-colors"
               >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>
 
           {/* Day Headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="grid grid-cols-7 gap-1 mb-2 min-w-[400px]">
             {DAYS.map((day) => (
-              <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+              <div key={day} className="text-center text-xs md:text-sm font-medium text-slate-500 py-1 md:py-2">
                 {day}
               </div>
             ))}
           </div>
 
           {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1 min-w-[400px]">
             {days.map((date, index) => {
               if (!date) {
-                return <div key={`empty-${index}`} className="h-20 md:h-24" />;
+                return <div key={`empty-${index}`} className="h-16 md:h-24" />;
               }
 
               const dayProjects = getProjectsForDate(date);
               const isSelected = selectedDate?.toDateString() === date.toDateString();
 
               return (
-                <div
+                 <div
                   key={date.toISOString()}
                   onClick={() => setSelectedDate(date)}
-                  className={`h-20 md:h-24 p-1 md:p-2 rounded-lg cursor-pointer transition-colors ${
+                  className={`h-16 md:h-24 p-1 md:p-2 rounded-lg cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-indigo-50 border-2 border-indigo-500'
+                      ? 'bg-blue-500/10 border border-blue-500/40'
                       : isToday(date)
-                        ? 'bg-indigo-50 border border-indigo-300'
-                        : 'hover:bg-gray-50 border border-transparent'
+                        ? 'bg-blue-500/10 border border-blue-500/30'
+                        : 'hover:bg-slate-800/50 border border-transparent'
                   } ${!isSameMonth(date) ? 'opacity-40' : ''}`}
                 >
                   <div className={`text-sm font-medium mb-1 ${
-                    isToday(date) ? 'text-indigo-600' : 'text-gray-700'
+                    isToday(date) ? 'text-blue-400' : 'text-slate-300'
                   }`}>
                     {date.getDate()}
                   </div>
@@ -250,7 +252,7 @@ export default function CalendarPage() {
                       </div>
                     ))}
                     {dayProjects.length > 2 && (
-                      <div className="text-xs text-gray-500 pl-1">
+                      <div className="text-xs text-sky-500 pl-1">
                         +{dayProjects.length - 2} more
                       </div>
                     )}
@@ -262,13 +264,12 @@ export default function CalendarPage() {
         </div>
 
         {/* Selected Day Details */}
-        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <CalendarIcon className="w-5 h-5" />
+        <div className="bg-slate-900 border border-slate-700/50 rounded-2xl p-4 md:p-6 shadow-2xl">
+          <h3 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
+            <CalendarIcon className="w-5 h-5 text-blue-400" />
             {selectedDate
-              ? `${selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} - Due Projects`
-              : 'Select a date'
-            }
+              ? `${selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} — Due Projects`
+              : 'Select a date'}
           </h3>
 
           {selectedDate && todayProjects.length > 0 ? (
@@ -279,13 +280,13 @@ export default function CalendarPage() {
                   className={`p-3 rounded-lg border ${getStatusColor(project.status)}`}
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 text-sm">{project.name}</h4>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-slate-100 text-sm truncate">{project.name}</h4>
                       {project.projectType && (
-                        <p className="text-xs text-gray-500 mt-1">{project.projectType.name}</p>
+                        <p className="text-xs text-slate-400 mt-1 truncate">{project.projectType.name}</p>
                       )}
                       {project.assignedTo && (
-                        <p className="text-xs text-gray-500 mt-1">Assigned to: {project.assignedTo.name}</p>
+                        <p className="text-xs text-slate-500 mt-1 truncate">Assigned to: {project.assignedTo.name}</p>
                       )}
                     </div>
                     {getStatusIcon(project.status)}
@@ -295,8 +296,8 @@ export default function CalendarPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <CalendarIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">
+              <CalendarIcon className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+              <p className="text-slate-500 text-sm">
                 {selectedDate ? 'No projects due' : 'Select a date to view due projects'}
               </p>
             </div>
@@ -305,24 +306,24 @@ export default function CalendarPage() {
       </div>
 
       {/* Project Legend */}
-      <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Legend</h3>
+      <div className="bg-slate-900 border border-slate-700/50 rounded-2xl p-4 md:p-6 shadow-2xl">
+        <h3 className="text-lg font-semibold text-slate-100 mb-4">Legend</h3>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded" />
-            <span className="text-sm text-gray-600">Not Started</span>
+            <div className="w-4 h-4 bg-slate-500/20 border border-slate-500/30 rounded" />
+            <span className="text-sm text-slate-400">Not Started</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded" />
-            <span className="text-sm text-gray-600">In Progress</span>
+            <div className="w-4 h-4 bg-blue-500/20 border border-blue-500/30 rounded" />
+            <span className="text-sm text-slate-400">In Progress</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-100 border border-green-300 rounded" />
-            <span className="text-sm text-gray-600">Completed</span>
+            <div className="w-4 h-4 bg-emerald-500/20 border border-emerald-500/30 rounded" />
+            <span className="text-sm text-slate-400">Completed</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-yellow-100 border border-yellow-300 rounded" />
-            <span className="text-sm text-gray-600">On Hold</span>
+            <div className="w-4 h-4 bg-amber-500/20 border border-amber-500/30 rounded" />
+            <span className="text-sm text-slate-400">On Hold</span>
           </div>
         </div>
       </div>

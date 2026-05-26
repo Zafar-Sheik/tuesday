@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { User } from '@/models/User';
 import { getSessionUser } from '@/lib/auth';
+import bcrypt from 'bcryptjs';
 
 export async function PUT(
   request: NextRequest,
@@ -28,7 +29,8 @@ export async function PUT(
     
     // Only update password if provided
     if (password) {
-      updateData.password = password;
+      const hashedPassword = await bcrypt.hash(password, 12);
+      updateData.password = hashedPassword;
     }
 
     const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });

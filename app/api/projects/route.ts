@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { Project } from '@/models/Project';
 import { ProjectType } from '@/models/ProjectType';
-import { Task } from '@/models/Task';
 import { requireRole } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -38,11 +37,22 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    const url = new URL(request.url);
+    const sortBy = url.searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = url.searchParams.get('sortOrder') === 'asc' ? 1 : -1;
+
+    const sortObj: Record<string, 1 | -1> = {};
+    if (sortBy === 'dueDate') {
+      sortObj.endDate = sortOrder;
+    } else {
+      sortObj[sortBy] = sortOrder;
+    }
+
     const projects = await Project.find(query)
       .populate('projectType')
       .populate('assignedTo', 'name email')
       .populate('createdBy', 'name email')
-      .sort({ createdAt: -1 });
+      .sort(sortObj);
 
     return NextResponse.json({
       success: true,

@@ -283,524 +283,524 @@ export default function JobCardsPage() {
       jc.technician?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-  if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-      </div>
-    );
-  }
+   if (loading || !user) {
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-slate-950">
+         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+       </div>
+     );
+   }
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Job Cards</h1>
-            <p className="text-gray-500 mt-1">Track and manage client job cards</p>
-          </div>
+       {/* Header */}
+       <div className="mb-6">
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+           <div>
+             <h1 className="text-2xl md:text-3xl font-bold text-slate-100">Job Cards</h1>
+             <p className="text-slate-400 mt-1">Track and manage client job cards</p>
+           </div>
 
-          {(isAdmin || user?.role === 'technician') && (
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              <span>New Job Card</span>
-            </button>
-          )}
+           {(isAdmin || user?.role === 'technician') && (
+             <button
+               onClick={() => setShowModal(true)}
+               className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+             >
+               <Plus className="w-5 h-5" />
+               <span>New Job Card</span>
+             </button>
+           )}
+         </div>
+       </div>
+
+       {/* Search and Filters */}
+       <div className="flex flex-col md:flex-row gap-4 mb-6">
+         <div className="relative flex-1">
+           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+           <input
+             type="text"
+             placeholder="Search job cards by client, company, fault, or technician..."
+             value={searchTerm}
+             onChange={(e) => setSearchTerm(e.target.value)}
+             className="w-full pl-10 pr-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100 placeholder:text-slate-500"
+           />
+         </div>
+
+         <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+           {[
+             { value: 'all', label: 'All' },
+             { value: 'pending', label: 'Pending' },
+             { value: 'complete', label: 'Completed' }
+           ].map((f) => (
+             <button
+               key={f.value}
+               onClick={() => setFilter(f.value as typeof filter)}
+               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                 filter === f.value
+                   ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white'
+                   : 'glass text-slate-300 hover:bg-slate-800/50 border border-slate-700/50'
+               }`}
+             >
+               {f.label}
+             </button>
+           ))}
+         </div>
         </div>
-      </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search job cards by client, company, fault, or technician..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          />
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-          {[
-            { value: 'all', label: 'All' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'complete', label: 'Completed' }
-          ].map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value as typeof filter)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                filter === f.value
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Job Cards Grid */}
+       {/* Job Cards Grid */}
       {filteredJobCards.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredJobCards.map((jobCard) => (
-            <div
-              key={jobCard._id}
-              onClick={() => openViewModal(jobCard)}
-              className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                    <Package className="w-5 h-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 truncate max-w-[140px]">{jobCard.clientName}</h3>
-                    <p className="text-xs text-gray-500">{new Date(jobCard.date).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  {(isAdmin || user?._id === jobCard.technician?._id) && (
-                    <>
-                      <button
-                        onClick={(e) => openEditModal(jobCard, e)}
-                        className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => handleDeleteJobCard(jobCard._id, e)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </>
-                  )}
-                  <span className={`ml-1 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${jobCard.complete ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                    {jobCard.complete ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                    {jobCard.complete ? 'Completed' : 'Pending'}
-                  </span>
-                </div>
-              </div>
+         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {filteredJobCards.map((jobCard) => (
+             <div
+               key={jobCard._id}
+               onClick={() => openViewModal(jobCard)}
+               className="glass rounded-2xl p-4 md:p-6 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all cursor-pointer"
+             >
+               <div className="flex items-start justify-between mb-3">
+                 <div className="flex items-center gap-2">
+                   <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                     <Package className="w-5 h-5 text-blue-500" />
+                   </div>
+                   <div>
+                     <h3 className="font-semibold text-slate-100 truncate max-w-[140px]">{jobCard.clientName}</h3>
+                     <p className="text-xs text-slate-400">{new Date(jobCard.date).toLocaleDateString()}</p>
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-1">
+                   {(isAdmin || user?._id === jobCard.technician?._id) && (
+                     <>
+                       <button
+                         onClick={(e) => openEditModal(jobCard, e)}
+                         className="p-1.5 text-slate-400 hover:bg-slate-800/50 rounded-lg transition-all"
+                       >
+                         <Edit className="w-4 h-4" />
+                       </button>
+                       <button
+                         onClick={(e) => handleDeleteJobCard(jobCard._id, e)}
+                         className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </button>
+                     </>
+                   )}
+                   <span className={`ml-1 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${jobCard.complete ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
+                     {jobCard.complete ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                     {jobCard.complete ? 'Completed' : 'Pending'}
+                   </span>
+                 </div>
+               </div>
 
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <UserIcon className="w-4 h-4 text-gray-400" />
-                  <span className="truncate">{jobCard.clientCompany}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  <span>{jobCard.timeIn} – {jobCard.timeOut}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <UserIcon className="w-4 h-4 text-gray-400" />
-                  <span>{jobCard.technician?.name || 'Unassigned'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <FileText className="w-4 h-4 text-gray-400" />
-                  <span className="truncate">{jobCard.faultDescription}</span>
-                </div>
-                {jobCard.image && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <ImageIcon className="w-4 h-4 text-gray-400" />
-                    <span className="text-xs text-gray-400">Photo attached</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+               <div className="space-y-2 text-sm">
+                 <div className="flex items-center gap-2 text-slate-300">
+                   <UserIcon className="w-4 h-4 text-slate-400" />
+                   <span className="truncate">{jobCard.clientCompany}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-slate-300">
+                   <Clock className="w-4 h-4 text-slate-400" />
+                   <span>{jobCard.timeIn} – {jobCard.timeOut}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-slate-300">
+                   <UserIcon className="w-4 h-4 text-slate-400" />
+                   <span>{jobCard.technician?.name || 'Unassigned'}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-slate-300">
+                   <FileText className="w-4 h-4 text-slate-400" />
+                   <span className="truncate">{jobCard.faultDescription}</span>
+                 </div>
+                 {jobCard.image && (
+                   <div className="flex items-center gap-2 text-slate-300">
+                     <ImageIcon className="w-4 h-4 text-slate-400" />
+                     <span className="text-xs text-slate-400">Photo attached</span>
+                   </div>
+                 )}
+               </div>
+             </div>
+           ))}
+         </div>
       ) : (
-        <div className="text-center py-12">
-          <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No job cards found</h3>
-          <p className="text-gray-500 mb-4">
-            {searchTerm ? 'Try a different search term' : 'Create your first job card to get started'}
-          </p>
-          {(isAdmin || user?.role === 'technician') && !searchTerm && (
-            <button
-              onClick={() => setShowModal(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            >
-              Create Job Card
-            </button>
-          )}
-        </div>
+          <div className="text-center py-12">
+           <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+           <h3 className="text-lg font-semibold text-slate-100 mb-2">No job cards found</h3>
+           <p className="text-slate-400 mb-4">
+             {searchTerm ? 'Try a different search term' : 'Create your first job card to get started'}
+           </p>
+           {(isAdmin || user?.role === 'technician') && !searchTerm && (
+             <button
+               onClick={() => setShowModal(true)}
+               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+             >
+               Create Job Card
+             </button>
+           )}
+         </div>
       )}
 
-      {/* Create Job Card Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-4 md:p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Create New Job Card</h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
+       {/* Create Job Card Modal */}
+       {showModal && (
+         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+           <div className="glass rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+             <div className="p-4 md:p-6 border-b border-slate-700/50 flex items-center justify-between">
+               <h2 className="text-xl font-bold text-slate-100">Create New Job Card</h2>
+               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-800/50 rounded-lg transition-all">
+                 <X className="w-5 h-5 text-slate-400" />
+               </button>
+             </div>
 
-            <form onSubmit={handleCreateJobCard} className="p-4 md:p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    value={newJobCard.date}
-                    onChange={(e) => setNewJobCard({ ...newJobCard, date: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time In</label>
-                  <input
-                    type="time"
-                    value={newJobCard.timeIn}
-                    onChange={(e) => setNewJobCard({ ...newJobCard, timeIn: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-              </div>
+             <form onSubmit={handleCreateJobCard} className="p-4 md:p-6 space-y-4">
+               <div className="grid grid-cols-2 gap-4">
+                 <div>
+                   <label className="block text-sm font-medium text-slate-300 mb-1">Date</label>
+                   <input
+                     type="date"
+                     value={newJobCard.date}
+                     onChange={(e) => setNewJobCard({ ...newJobCard, date: e.target.value })}
+                     className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                     required
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-slate-300 mb-1">Time In</label>
+                   <input
+                     type="time"
+                     value={newJobCard.timeIn}
+                     onChange={(e) => setNewJobCard({ ...newJobCard, timeIn: e.target.value })}
+                     className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                     required
+                   />
+                 </div>
+               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time Out</label>
-                  <input
-                    type="time"
-                    value={newJobCard.timeOut}
-                    onChange={(e) => setNewJobCard({ ...newJobCard, timeOut: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-                {isAdmin && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
-                    <select
-                      value={newJobCard.technician}
-                      onChange={(e) => setNewJobCard({ ...newJobCard, technician: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                      required
-                    >
-                      <option value="">Select Technician</option>
-                      {users.filter(u => u.role === 'technician').map((u) => (
-                        <option key={u._id} value={u._id}>{u.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client Company</label>
-                <input
-                  type="text"
-                  value={newJobCard.clientCompany}
-                  onChange={(e) => setNewJobCard({ ...newJobCard, clientCompany: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Client company name"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
-                <input
-                  type="text"
-                  value={newJobCard.clientName}
-                  onChange={(e) => setNewJobCard({ ...newJobCard, clientName: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Client contact name"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fault Description</label>
-                <textarea
-                  value={newJobCard.faultDescription}
-                  onChange={(e) => setNewJobCard({ ...newJobCard, faultDescription: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Describe the fault"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Scope of Work</label>
-                <textarea
-                  value={newJobCard.scopeOfWork}
-                  onChange={(e) => setNewJobCard({ ...newJobCard, scopeOfWork: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Describe the scope of work"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Work Carried Out</label>
-                <textarea
-                  value={newJobCard.workCarriedOut}
-                  onChange={(e) => setNewJobCard({ ...newJobCard, workCarriedOut: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Describe work carried out"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Comments</label>
-                <textarea
-                  value={newJobCard.comments}
-                  onChange={(e) => setNewJobCard({ ...newJobCard, comments: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Additional comments (optional)"
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <ImageUpload
-                  value={newJobCard.image}
-                  onChange={(image) => setNewJobCard({ ...newJobCard, image })}
-                  label="Image (Optional)"
-                />
-              </div>
+               <div className="grid grid-cols-2 gap-4">
+                 <div>
+                   <label className="block text-sm font-medium text-slate-300 mb-1">Time Out</label>
+                   <input
+                     type="time"
+                     value={newJobCard.timeOut}
+                     onChange={(e) => setNewJobCard({ ...newJobCard, timeOut: e.target.value })}
+                     className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                     required
+                   />
+                 </div>
+                 {isAdmin && (
+                   <div>
+                     <label className="block text-sm font-medium text-slate-300 mb-1">Technician</label>
+                     <select
+                       value={newJobCard.technician}
+                       onChange={(e) => setNewJobCard({ ...newJobCard, technician: e.target.value })}
+                       className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                       required
+                     >
+                       <option value="">Select Technician</option>
+                       {users.filter(u => u.role === 'technician').map((u) => (
+                         <option key={u._id} value={u._id}>{u.name}</option>
+                       ))}
+                     </select>
+                   </div>
+                 )}
+               </div>
 
                <div>
-                 <SignaturePad
-                   value={newJobCard.clientSignature}
-                   onChange={(clientSignature) => setNewJobCard({ ...newJobCard, clientSignature })}
-                   label="Client Signature (Optional)"
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Client Company</label>
+                 <input
+                   type="text"
+                   value={newJobCard.clientCompany}
+                   onChange={(e) => setNewJobCard({ ...newJobCard, clientCompany: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   placeholder="Client company name"
+                   required
                  />
                </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="complete"
-                  checked={newJobCard.complete}
-                  onChange={(e) => setNewJobCard({ ...newJobCard, complete: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                />
-                <label htmlFor="complete" className="text-sm font-medium text-gray-700">
-                  Mark as Complete
-                </label>
-              </div>
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Client Name</label>
+                 <input
+                   type="text"
+                   value={newJobCard.clientName}
+                   onChange={(e) => setNewJobCard({ ...newJobCard, clientName: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   placeholder="Client contact name"
+                   required
+                 />
+               </div>
 
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
-                >
-                  Create Job Card
-                </button>
-              </div>
-            </form>
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Fault Description</label>
+                 <textarea
+                   value={newJobCard.faultDescription}
+                   onChange={(e) => setNewJobCard({ ...newJobCard, faultDescription: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   placeholder="Describe the fault"
+                   rows={3}
+                   required
+                 />
+               </div>
+
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Scope of Work</label>
+                 <textarea
+                   value={newJobCard.scopeOfWork}
+                   onChange={(e) => setNewJobCard({ ...newJobCard, scopeOfWork: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   placeholder="Describe the scope of work"
+                   rows={3}
+                   required
+                 />
+               </div>
+
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Work Carried Out</label>
+                 <textarea
+                   value={newJobCard.workCarriedOut}
+                   onChange={(e) => setNewJobCard({ ...newJobCard, workCarriedOut: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   placeholder="Describe work carried out"
+                   rows={3}
+                   required
+                 />
+               </div>
+
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Comments</label>
+                 <textarea
+                   value={newJobCard.comments}
+                   onChange={(e) => setNewJobCard({ ...newJobCard, comments: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   placeholder="Additional comments (optional)"
+                   rows={2}
+                 />
+               </div>
+
+               <div>
+                 <ImageUpload
+                   value={newJobCard.image}
+                   onChange={(image) => setNewJobCard({ ...newJobCard, image })}
+                   label="Image (Optional)"
+                 />
+               </div>
+
+                <div>
+                  <SignaturePad
+                    value={newJobCard.clientSignature}
+                    onChange={(clientSignature) => setNewJobCard({ ...newJobCard, clientSignature })}
+                    label="Client Signature (Optional)"
+                  />
+                </div>
+
+               <div className="flex items-center gap-2">
+                 <input
+                   type="checkbox"
+                   id="complete"
+                   checked={newJobCard.complete}
+                   onChange={(e) => setNewJobCard({ ...newJobCard, complete: e.target.checked })}
+                   className="w-4 h-4 text-blue-600 border-slate-600 rounded focus:ring-blue-500"
+                 />
+                 <label htmlFor="complete" className="text-sm font-medium text-slate-300">
+                   Mark as Complete
+                 </label>
+               </div>
+
+               <div className="flex gap-3 pt-4">
+                 <button
+                   type="button"
+                   onClick={() => setShowModal(false)}
+                   className="flex-1 px-4 py-2.5 border border-slate-700/50 text-slate-300 rounded-xl hover:bg-slate-800/50 transition-all"
+                 >
+                   Cancel
+                 </button>
+                 <button
+                   type="submit"
+                   className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+                 >
+                   Create Job Card
+                 </button>
+               </div>
+             </form>
           </div>
         </div>
       )}
 
-      {/* Edit Job Card Modal */}
-      {showEditModal && editingJobCard && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-4 md:p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Edit Job Card</h2>
-              <button onClick={() => { setShowEditModal(false); setEditingJobCard(null); }} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
+       {/* Edit Job Card Modal */}
+       {showEditModal && editingJobCard && (
+         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+           <div className="glass rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+             <div className="p-4 md:p-6 border-b border-slate-700/50 flex items-center justify-between">
+               <h2 className="text-xl font-bold text-slate-100">Edit Job Card</h2>
+               <button onClick={() => { setShowEditModal(false); setEditingJobCard(null); }} className="p-2 hover:bg-slate-800/50 rounded-lg transition-all">
+                 <X className="w-5 h-5 text-slate-400" />
+               </button>
+             </div>
 
-            <form onSubmit={handleEditJobCard} className="p-4 md:p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    value={editingJobCard.date?.slice(0, 10) || ''}
-                    onChange={(e) => setEditingJobCard({ ...editingJobCard, date: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time In</label>
-                  <input
-                    type="time"
-                    value={editingJobCard.timeIn}
-                    onChange={(e) => setEditingJobCard({ ...editingJobCard, timeIn: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-              </div>
+             <form onSubmit={handleEditJobCard} className="p-4 md:p-6 space-y-4">
+               <div className="grid grid-cols-2 gap-4">
+                 <div>
+                   <label className="block text-sm font-medium text-slate-300 mb-1">Date</label>
+                   <input
+                     type="date"
+                     value={editingJobCard.date?.slice(0, 10) || ''}
+                     onChange={(e) => setEditingJobCard({ ...editingJobCard, date: e.target.value })}
+                     className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                     required
+                   />
+                 </div>
+                 <div>
+                   <label className="block text-sm font-medium text-slate-300 mb-1">Time In</label>
+                   <input
+                     type="time"
+                     value={editingJobCard.timeIn}
+                     onChange={(e) => setEditingJobCard({ ...editingJobCard, timeIn: e.target.value })}
+                     className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                     required
+                   />
+                 </div>
+               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time Out</label>
-                  <input
-                    type="time"
-                    value={editingJobCard.timeOut}
-                    onChange={(e) => setEditingJobCard({ ...editingJobCard, timeOut: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-                {isAdmin && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
-                    <select
-                      value={editingJobCard.technician?._id || ''}
-                      onChange={(e) => {
-                        const tech = users.find(u => u._id === e.target.value);
-                        if (tech) {
-                          setEditingJobCard({ ...editingJobCard, technician: { _id: tech._id, name: tech.name, email: tech.email } });
-                        }
-                      }}
-                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                      required
-                    >
-                      <option value="">Select Technician</option>
-                      {users.filter(u => u.role === 'technician').map((u) => (
-                        <option key={u._id} value={u._id}>{u.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client Company</label>
-                <input
-                  type="text"
-                  value={editingJobCard.clientCompany}
-                  onChange={(e) => setEditingJobCard({ ...editingJobCard, clientCompany: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
-                <input
-                  type="text"
-                  value={editingJobCard.clientName}
-                  onChange={(e) => setEditingJobCard({ ...editingJobCard, clientName: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fault Description</label>
-                <textarea
-                  value={editingJobCard.faultDescription}
-                  onChange={(e) => setEditingJobCard({ ...editingJobCard, faultDescription: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Scope of Work</label>
-                <textarea
-                  value={editingJobCard.scopeOfWork}
-                  onChange={(e) => setEditingJobCard({ ...editingJobCard, scopeOfWork: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Work Carried Out</label>
-                <textarea
-                  value={editingJobCard.workCarriedOut}
-                  onChange={(e) => setEditingJobCard({ ...editingJobCard, workCarriedOut: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Comments</label>
-                <textarea
-                  value={editingJobCard.comments || ''}
-                  onChange={(e) => setEditingJobCard({ ...editingJobCard, comments: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <ImageUpload
-                  value={editingJobCard.image || ''}
-                  onChange={(image) => setEditingJobCard({ ...editingJobCard, image })}
-                  label="Image (Optional)"
-                />
-              </div>
+               <div className="grid grid-cols-2 gap-4">
+                 <div>
+                   <label className="block text-sm font-medium text-slate-300 mb-1">Time Out</label>
+                   <input
+                     type="time"
+                     value={editingJobCard.timeOut}
+                     onChange={(e) => setEditingJobCard({ ...editingJobCard, timeOut: e.target.value })}
+                     className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                     required
+                   />
+                 </div>
+                 {isAdmin && (
+                   <div>
+                     <label className="block text-sm font-medium text-slate-300 mb-1">Technician</label>
+                     <select
+                       value={editingJobCard.technician?._id || ''}
+                       onChange={(e) => {
+                         const tech = users.find(u => u._id === e.target.value);
+                         if (tech) {
+                           setEditingJobCard({ ...editingJobCard, technician: { _id: tech._id, name: tech.name, email: tech.email } });
+                         }
+                       }}
+                       className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                       required
+                     >
+                       <option value="">Select Technician</option>
+                       {users.filter(u => u.role === 'technician').map((u) => (
+                         <option key={u._id} value={u._id}>{u.name}</option>
+                       ))}
+                     </select>
+                   </div>
+                 )}
+               </div>
 
                <div>
-                 <SignaturePad
-                   value={editingJobCard.clientSignature || ''}
-                   onChange={(clientSignature) => setEditingJobCard({ ...editingJobCard, clientSignature })}
-                   label="Client Signature (Optional)"
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Client Company</label>
+                 <input
+                   type="text"
+                   value={editingJobCard.clientCompany}
+                   onChange={(e) => setEditingJobCard({ ...editingJobCard, clientCompany: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   required
                  />
                </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="edit-complete"
-                  checked={editingJobCard.complete}
-                  onChange={(e) => setEditingJobCard({ ...editingJobCard, complete: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                />
-                <label htmlFor="edit-complete" className="text-sm font-medium text-gray-700">
-                  Mark as Complete
-                </label>
-              </div>
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Client Name</label>
+                 <input
+                   type="text"
+                   value={editingJobCard.clientName}
+                   onChange={(e) => setEditingJobCard({ ...editingJobCard, clientName: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   required
+                 />
+               </div>
 
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => { setShowEditModal(false); setEditingJobCard(null); }}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Fault Description</label>
+                 <textarea
+                   value={editingJobCard.faultDescription}
+                   onChange={(e) => setEditingJobCard({ ...editingJobCard, faultDescription: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   rows={3}
+                   required
+                 />
+               </div>
+
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Scope of Work</label>
+                 <textarea
+                   value={editingJobCard.scopeOfWork}
+                   onChange={(e) => setEditingJobCard({ ...editingJobCard, scopeOfWork: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   rows={3}
+                   required
+                 />
+               </div>
+
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Work Carried Out</label>
+                 <textarea
+                   value={editingJobCard.workCarriedOut}
+                   onChange={(e) => setEditingJobCard({ ...editingJobCard, workCarriedOut: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   rows={3}
+                   required
+                 />
+               </div>
+
+               <div>
+                 <label className="block text-sm font-medium text-slate-300 mb-1">Comments</label>
+                 <textarea
+                   value={editingJobCard.comments || ''}
+                   onChange={(e) => setEditingJobCard({ ...editingJobCard, comments: e.target.value })}
+                   className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                   rows={2}
+                 />
+               </div>
+
+               <div>
+                 <ImageUpload
+                   value={editingJobCard.image || ''}
+                   onChange={(image) => setEditingJobCard({ ...editingJobCard, image })}
+                   label="Image (Optional)"
+                 />
+               </div>
+
+                <div>
+                  <SignaturePad
+                    value={editingJobCard.clientSignature || ''}
+                    onChange={(clientSignature) => setEditingJobCard({ ...editingJobCard, clientSignature })}
+                    label="Client Signature (Optional)"
+                  />
+                </div>
+
+               <div className="flex items-center gap-2">
+                 <input
+                   type="checkbox"
+                   id="edit-complete"
+                   checked={editingJobCard.complete}
+                   onChange={(e) => setEditingJobCard({ ...editingJobCard, complete: e.target.checked })}
+                   className="w-4 h-4 text-blue-600 border-slate-600 rounded focus:ring-blue-500"
+                 />
+                 <label htmlFor="edit-complete" className="text-sm font-medium text-slate-300">
+                   Mark as Complete
+                 </label>
+               </div>
+
+               <div className="flex gap-3 pt-4">
+                 <button
+                   type="button"
+                   onClick={() => { setShowEditModal(false); setEditingJobCard(null); }}
+                   className="flex-1 px-4 py-2.5 border border-slate-700/50 text-slate-300 rounded-xl hover:bg-slate-800/50 transition-all"
+                 >
+                   Cancel
+                 </button>
+                 <button
+                   type="submit"
+                   className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+                 >
+                   Save Changes
+                 </button>
+               </div>
+             </form>
+           </div>
+         </div>
+       )}
 
       {/* View Job Card Modal */}
       {showViewModal && viewingJobCard && (
