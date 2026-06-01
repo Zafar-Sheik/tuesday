@@ -60,20 +60,30 @@ export default function DashboardPage() {
   }, [user, authLoading, router]);
 
   const fetchData = async () => {
-    try {
-      const dashboardRes = await fetch('/api/dashboard', {
-        credentials: 'include',
-        cache: 'no-store'
-      });
-      const dashboardData = await dashboardRes.json();
-      if (dashboardData.success) {
-        setData(dashboardData.data);
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const dashboardRes = await fetch('/api/dashboard', {
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        const dashboardData = await dashboardRes.json();
+        if (dashboardData.success) {
+          setData(dashboardData.data);
+          break;
+        } else {
+          throw new Error(dashboardData.error || 'Failed to fetch');
+        }
+      } catch (error) {
+        retries--;
+        if (retries === 0) {
+          console.error('Error fetching dashboard:', error);
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
-    } catch (error) {
-      console.error('Error fetching dashboard:', error);
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   if (loading || !user) {

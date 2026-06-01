@@ -18,19 +18,32 @@ if (!cached) {
 }
 
 async function dbConnect(): Promise<typeof mongoose> {
-  if (cached!.conn) {
+  if (cached!.conn && cached!.conn.connection.readyState === 1) {
     return cached!.conn;
   }
 
-  if (!cached!.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
+  // Reset cache if connection is not ready (disconnected/closed)
+  cached!.conn = null;
+  cached!.promise = null;
 
-    cached!.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
-  }
+  const opts = {
+    bufferCommands: false,
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 10000,
+  };
+
+  const connectWithRetry = async (retries = 3, delay = 1000): Promise<typeof mongoose> => {
+    try {
+      const mongooseInstance = await mongoose.connect(MONGODB_URI, opts);
+      return mongooseInstance;
+    } catch (error) {
+      if (retries <= 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return connectWithRetry(retries - 1, delay * 1.5);
+    }
+  };
+
+  cached!.promise = connectWithRetry();
 
   try {
     cached!.conn = await cached!.promise;
