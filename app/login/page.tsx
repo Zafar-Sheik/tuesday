@@ -11,27 +11,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
-   const handleSubmit = async (e: React.FormEvent) => {
-     e.preventDefault();
-     setError('');
-     setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-     try {
-       const { login } = useAuth();
-       const result = await login(email, password);
-       
-       if (!result.success) {
-         throw new Error(result.error || 'Login failed');
-       }
+    try {
+      const result = await login(email, password);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Login failed');
+      }
 
-       router.push('/dashboard');
-     } catch (err) {
-       setError(err instanceof Error ? err.message : 'Login failed');
-     } finally {
-       setLoading(false);
-     }
-   };
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
