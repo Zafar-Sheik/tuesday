@@ -22,91 +22,102 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const refreshUser = useCallback(async () => {
-    try {
-      setError(null);
-      const res = await fetch('/api/auth/me', {
-        credentials: 'include',
-        cache: 'no-store'
-      });
-      const data: ApiResponse<SessionUser> = await res.json();
-
-      if (data.success && data.data) {
-        setUser(data.data);
+    let retries = 3;
+    while (retries > 0) {
+      try {
         setError(null);
-      } else {
-        setUser(null);
-        setError(data.error || 'Not authenticated');
+        const res = await fetch('/api/auth/me', {
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const data: ApiResponse<SessionUser> = await res.json();
+
+        if (data.success && data.data) {
+          setUser(data.data);
+          setError(null);
+          break;
+        } else {
+          throw new Error(data.error || 'Not authenticated');
+        }
+      } catch (err) {
+        retries--;
+        if (retries === 0) {
+          console.error('Error refreshing user:', err);
+          setUser(null);
+          setError('Failed to connect to authentication service');
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
-    } catch (err) {
-      console.error('Error refreshing user:', err);
-      setUser(null);
-      setError('Failed to connect to authentication service');
-    } finally {
-      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    refreshUser();
+    refreshUser().finally(() => setLoading(false));
   }, [refreshUser]);
 
-  const login = useCallback(async (email: string, password: string): Promise<ApiResponse<SessionUser>> => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      const data: ApiResponse<SessionUser> = await res.json();
-      
-      if (data.success && data.data) {
-        setUser(data.data);
-      } else {
-        setUser(null);
-        setError(data.error || 'Login failed');
-      }
-      
-      return data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Network error during login';
-      setError(errorMessage);
-      setUser(null);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+   const login = useCallback(async (email: string, password: string): Promise<ApiResponse<SessionUser>> => {
+     try {
+       setLoading(true);
+       setError(null);
+       
+       const res = await fetch('/api/auth/login', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         credentials: 'include',
+         body: JSON.stringify({ email, password }),
+       });
+       
+       const data: ApiResponse<SessionUser> = await res.json();
+       
+       if (data.success && data.data) {
+         setUser(data.data);
+       } else {
+         setUser(null);
+         setError(data.error || 'Login failed');
+       }
+       
+       return data;
+     } catch (err) {
+       const errorMessage = err instanceof Error ? err.message : 'Network error during login';
+       setError(errorMessage);
+       setUser(null);
+       return { success: false, error: errorMessage };
+     } finally {
+       setLoading(false);
+     }
+   }, []);
 
-  const logout = useCallback(async (): Promise<ApiResponse<void>> => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const res = await fetch('/api/auth/logout', {
-        method: 'POST',
-      });
-      
-      const data: ApiResponse<void> = await res.json();
-      
-      if (data.success) {
-        setUser(null);
-      }
-      
-      return data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Network error during logout';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+   const logout = useCallback(async (): Promise<ApiResponse<void>> => {
+     try {
+       setLoading(true);
+       setError(null);
+       
+       const res = await fetch('/api/auth/logout', {
+         method: 'POST',
+         credentials: 'include',
+       });
+       
+       const data: ApiResponse<void> = await res.json();
+       
+       if (data.success) {
+         setUser(null);
+       }
+       
+       return data;
+     } catch (err) {
+       const errorMessage = err instanceof Error ? err.message : 'Network error during logout';
+       setError(errorMessage);
+       return { success: false, error: errorMessage };
+     } finally {
+       setLoading(false);
+     }
+   }, []);
 
   const value: AuthContextType = {
     user,

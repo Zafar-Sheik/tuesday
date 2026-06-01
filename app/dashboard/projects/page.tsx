@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -87,33 +87,6 @@ export default function ProjectsPage() {
     endDate: ''
   });
 
-  const fetchProjects = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        sortBy,
-        sortOrder
-      });
-      const res = await fetch(`/api/projects?${params}`, {
-        credentials: 'include',
-        cache: 'no-store'
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      const data = await res.json();
-      if (data.success) {
-        setProjects(data.data);
-      } else {
-        console.error('Failed to fetch projects:', data.error);
-      }
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [sortBy, sortOrder]);
-
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -126,6 +99,41 @@ export default function ProjectsPage() {
       fetchUsers();
     }
   }, [user, authLoading, router, sortBy, sortOrder]);
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const params = new URLSearchParams({
+          sortBy,
+          sortOrder
+        });
+        const res = await fetch(`/api/projects?${params}`, {
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        if (data.success) {
+          setProjects(data.data);
+          break;
+        } else {
+          throw new Error(data.error || 'Failed to fetch');
+        }
+      } catch (error) {
+        retries--;
+        if (retries === 0) {
+          console.error('Error fetching projects:', error);
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+    }
+    setLoading(false);
+  };
 
   const fetchProjectTypes = async () => {
     try {
