@@ -17,7 +17,9 @@ export async function GET(_request: NextRequest) {
 
     let query = {};
 
-    // All users can see all job cards (removed technician restriction)
+    if (user.role === 'technician') {
+      query = { technician: user._id };
+    }
 
     const jobCards = await JobCard.find(query)
       .populate('technician', 'name email')
