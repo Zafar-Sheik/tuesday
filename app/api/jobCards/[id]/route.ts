@@ -1,15 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { JobCard } from '@/models/JobCard';
-import { getSessionUser } from '@/lib/auth';
+import { requireRole } from '@/lib/auth';
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getSessionUser();
+    const user = await requireRole(['admin', 'developer', 'technician']);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
+    const { id } = await params;
+    await dbConnect();
+
+    const jobCard = await JobCard.findById(id)
+      .populate('technician', 'name email');
+
+    if (!jobCard) {
+      return NextResponse.json(
+        { success: false, error: 'Job card not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: jobCard,
+    });
+  } catch (error) {
+    console.error('Get job card error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const user = await requireRole(['admin', 'developer', 'technician']);
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -31,8 +63,17 @@ export async function PUT(
       image,
       clientSignature,
       signedAt,
-      complete
+      complete,
+      technician
     } = await request.json();
+
+    // Validate required fields
+    if (!date || !clientCompany || !clientName || !faultDescription || !scopeOfWork || !workCarriedOut || !timeIn || !timeOut) {
+      return NextResponse.json(
+        { success: false, error: 'Date, client company, client name, fault description, scope of work, work carried out, time in, and time out are required' },
+        { status: 400 }
+      );
+    }
 
     await dbConnect();
 
@@ -40,48 +81,44 @@ export async function PUT(
 
     if (!jobCard) {
       return NextResponse.json(
-        { success: false, error: 'JobCard not found' },
+        { success: false, error: 'Job card not found' },
         { status: 404 }
       );
     }
 
-    // Check permissions: admin can edit any, technician can edit only their own
-    if (user.role !== 'admin' && jobCard.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only edit your own job cards' },
-        { status: 403 }
-      );
-    }
+    // All roles can set any technician ID; if not provided, keep current technician
+    const technicianId = technician || jobCard.technician;
 
-    if (date) jobCard.date = new Date(date);
-    if (clientCompany) jobCard.clientCompany = clientCompany;
-    if (clientName) jobCard.clientName = clientName;
-    if (faultDescription) jobCard.faultDescription = faultDescription;
-    if (scopeOfWork) jobCard.scopeOfWork = scopeOfWork;
-    if (workCarriedOut) jobCard.workCarriedOut = workCarriedOut;
-    if (timeIn) jobCard.timeIn = timeIn;
-    if (timeOut) jobCard.timeOut = timeOut;
-    if (comments !== undefined) jobCard.comments = comments;
-    if (image !== undefined) jobCard.image = image;
-    if (clientSignature !== undefined) {
-      jobCard.clientSignature = clientSignature;
-      if (clientSignature) {
-        jobCard.signedAt = new Date();
-      } else {
-        jobCard.signedAt = undefined;
-      }
-    }
-    if (signedAt !== undefined) jobCard.signedAt = signedAt ? new Date(signedAt) : undefined;
-    if (complete !== undefined) jobCard.complete = complete;
+    // Prepare update data
+    const updateData: any = {
+      date: new Date(date),
+      clientCompany,
+      clientName,
+      faultDescription,
+      scopeOfWork,
+      workCarriedOut,
+      timeIn,
+      timeOut,
+      comments,
+      image,
+      clientSignature,
+      signedAt: signedAt ? new Date(signedAt) : (clientSignature ? new Date() : undefined),
+      technician: technicianId,
+      complete: complete ?? false,
+    };
 
-    await jobCard.save();
+    // Remove undefined fields
+    Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
-    const populatedJobCard = await JobCard.findById(id)
-      .populate('technician', 'name email');
+    const updatedJobCard = await JobCard.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('technician', 'name email');
 
     return NextResponse.json({
       success: true,
-      data: populatedJobCard,
+      data: updatedJobCard,
     });
   } catch (error) {
     console.error('Update job card error:', error);
@@ -92,13 +129,13 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const user = await getSessionUser();
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  return PUT(request, { params });
+}
 
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const user = await requireRole(['admin', 'developer', 'technician']);
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -107,23 +144,14 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
     await dbConnect();
 
     const jobCard = await JobCard.findById(id);
 
     if (!jobCard) {
       return NextResponse.json(
-        { success: false, error: 'JobCard not found' },
+        { success: false, error: 'Job card not found' },
         { status: 404 }
-      );
-    }
-
-    // Check permissions: admin can delete any, technician can delete only their own
-    if (user.role !== 'admin' && jobCard.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only delete your own job cards' },
-        { status: 403 }
       );
     }
 
@@ -131,6 +159,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
+      data: null,
     });
   } catch (error) {
     console.error('Delete job card error:', error);

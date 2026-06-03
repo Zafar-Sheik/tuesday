@@ -14,7 +14,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const { id } = await params;
-
     await dbConnect();
 
     const entry = await PasswordEntry.findById(id)
@@ -27,13 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    if (user.role !== 'admin' && entry.createdBy.toString() !== user._id) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
+    // All roles can view any password entry
     return NextResponse.json({
       success: true,
       data: entry,
@@ -78,13 +71,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    if (user.role !== 'admin' && entry.createdBy.toString() !== user._id) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
+    // All roles can update any password entry
     entry.title = title;
     entry.password = password;
     entry.notes = notes;
@@ -117,7 +104,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     const { id } = await params;
-
     await dbConnect();
 
     const entry = await PasswordEntry.findById(id);
@@ -129,17 +115,12 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       );
     }
 
-    if (user.role !== 'admin' && entry.createdBy.toString() !== user._id) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
+    // All roles can delete any password entry
     await entry.deleteOne();
 
     return NextResponse.json({
       success: true,
+      data: null,
     });
   } catch (error) {
     console.error('Delete password error:', error);

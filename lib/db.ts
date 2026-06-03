@@ -11,6 +11,7 @@ declare global {
   var mongoose: MongooseConnection | undefined;
 }
 
+// Initialize cached connection object if it doesn't exist
 let cached = global.mongoose;
 
 if (!cached) {
@@ -18,14 +19,17 @@ if (!cached) {
 }
 
 async function dbConnect(): Promise<typeof mongoose> {
-  if (cached!.conn && cached!.conn.connection.readyState === 1) {
-    return cached!.conn;
+  // If we have a cached connection that's connected, return it
+  if (cached.conn && cached.conn.connection.readyState === 1) {
+    return cached.conn;
   }
 
-  // Reset cache if connection is not ready (disconnected/closed)
-  cached!.conn = null;
-  cached!.promise = null;
+  // If we already have a connection promise in progress, wait for it
+  if (cached.promise) {
+    return cached.promise;
+  }
 
+  // No connection attempt in progress, create one
   const opts = {
     bufferCommands: false,
     serverSelectionTimeoutMS: 5000,
@@ -43,16 +47,19 @@ async function dbConnect(): Promise<typeof mongoose> {
     }
   };
 
-  cached!.promise = connectWithRetry();
+  // Set the promise to track the connection attempt
+  cached.promise = connectWithRetry();
 
   try {
-    cached!.conn = await cached!.promise;
+    // Wait for the connection to complete and cache it
+    cached.conn = await cached.promise;
   } catch (e) {
-    cached!.promise = null;
+    // If connection failed, clear the promise so next attempt can retry
+    cached.promise = null;
     throw e;
   }
 
-  return cached!.conn;
+  return cached.conn;
 }
 
 export default dbConnect;

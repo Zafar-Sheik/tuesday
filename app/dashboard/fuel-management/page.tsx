@@ -70,8 +70,6 @@ export default function FuelManagementPage() {
   const [filter, setFilter] = useState<'all' | 'complete' | 'pending'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const isAdmin = user?.role === 'admin';
-
   const [newFuel, setNewFuel] = useState<FuelFormData>({
     date: '',
     vehicle: '',
@@ -99,11 +97,10 @@ export default function FuelManagementPage() {
 
   const fetchFuelRecords = async () => {
     try {
-      const res = await fetch('/api/fuel-management');
+      const res = await fetch('/api/fuel-management', { credentials: 'include', cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP error');
       const data = await res.json();
-      if (data.success) {
-        setFuelRecords(data.data);
-      }
+      if (data.success) setFuelRecords(data.data);
     } catch (error) {
       console.error('Error fetching fuel records:', error);
     } finally {
@@ -113,11 +110,10 @@ export default function FuelManagementPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users');
+      const res = await fetch('/api/users', { credentials: 'include', cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP error');
       const data = await res.json();
-      if (data.success) {
-        setUsers(data.data);
-      }
+      if (data.success) setUsers(data.data);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -127,22 +123,23 @@ export default function FuelManagementPage() {
     e.preventDefault();
 
     try {
-      const body = {
-        date: newFuel.date,
-        vehicle: newFuel.vehicle,
-        mileage: newFuel.mileage,
-        amountFilled: newFuel.amountFilled,
-        litresFilled: newFuel.litresFilled,
-        garage: newFuel.garage,
-        kmDone: newFuel.kmDone,
-        image: newFuel.image,
-        complete: newFuel.complete,
-        ...(isAdmin && newFuel.technician ? { technician: newFuel.technician } : {})
-      };
+        const body = {
+          date: newFuel.date,
+          vehicle: newFuel.vehicle,
+          mileage: newFuel.mileage,
+          amountFilled: newFuel.amountFilled,
+          litresFilled: newFuel.litresFilled,
+          garage: newFuel.garage,
+          kmDone: newFuel.kmDone,
+          image: newFuel.image,
+          complete: newFuel.complete,
+          technician: newFuel.technician
+        };
 
       const res = await fetch('/api/fuel-management', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(body)
       });
 
@@ -176,18 +173,18 @@ export default function FuelManagementPage() {
     if (!editingFuel) return;
 
     try {
-      const body = {
-        date: editingFuel.date,
-        vehicle: editingFuel.vehicle,
-        mileage: editingFuel.mileage,
-        amountFilled: editingFuel.amountFilled,
-        litresFilled: editingFuel.litresFilled,
-        garage: editingFuel.garage,
-        kmDone: editingFuel.kmDone,
-        image: editingFuel.image,
-        complete: editingFuel.complete,
-        ...(isAdmin && editingFuel.technician?._id ? { technician: editingFuel.technician._id } : {})
-      };
+        const body = {
+          date: editingFuel.date,
+          vehicle: editingFuel.vehicle,
+          mileage: editingFuel.mileage,
+          amountFilled: editingFuel.amountFilled,
+          litresFilled: editingFuel.litresFilled,
+          garage: editingFuel.garage,
+          kmDone: editingFuel.kmDone,
+          image: editingFuel.image,
+          complete: editingFuel.complete,
+          technician: editingFuel.technician._id
+        };
 
       const res = await fetch(`/api/fuel-management/${editingFuel._id}`, {
         method: 'PUT',
@@ -279,15 +276,13 @@ export default function FuelManagementPage() {
              <p className="text-slate-400 mt-1">Track and manage vehicle fuel consumption</p>
            </div>
 
-           {isAdmin && (
-             <button
-               onClick={() => setShowModal(true)}
-               className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
-             >
-               <Plus className="w-5 h-5" />
-               <span>New Fuel Record</span>
-             </button>
-           )}
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              <span>New Fuel Record</span>
+            </button>
          </div>
        </div>
 
@@ -343,30 +338,22 @@ export default function FuelManagementPage() {
                      <h3 className="font-semibold text-slate-100 truncate max-w-[140px]">{fuel.vehicle}</h3>
                      <p className="text-xs text-slate-400">{new Date(fuel.date).toLocaleDateString()}</p>
                    </div>
+                  </div>
+                   <div className="flex items-center gap-1">
+                     <button
+                       onClick={(e) => openEditModal(fuel, e)}
+                       className="p-1.5 text-slate-400 hover:bg-slate-800/50 rounded-lg transition-all"
+                     >
+                       <Edit className="w-4 h-4" />
+                     </button>
+                     <button
+                       onClick={(e) => handleDeleteFuel(fuel._id, e)}
+                       className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                     >
+                       <Trash2 className="w-4 h-4" />
+                     </button>
+                   </div>
                  </div>
-                 <div className="flex items-center gap-1">
-                   {(isAdmin || user?._id === fuel.technician?._id) && (
-                     <>
-                       <button
-                         onClick={(e) => openEditModal(fuel, e)}
-                         className="p-1.5 text-slate-400 hover:bg-slate-800/50 rounded-lg transition-all"
-                       >
-                         <Edit className="w-4 h-4" />
-                       </button>
-                       <button
-                         onClick={(e) => handleDeleteFuel(fuel._id, e)}
-                         className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </button>
-                     </>
-                   )}
-                   <span className={`ml-1 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${fuel.complete ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
-                     {fuel.complete ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                     {fuel.complete ? 'Completed' : 'Pending'}
-                   </span>
-                 </div>
-               </div>
 
                <div className="space-y-2 text-sm">
                  <div className="flex items-center gap-2 text-slate-300">
@@ -406,14 +393,14 @@ export default function FuelManagementPage() {
            <p className="text-slate-400 mb-4">
              {searchTerm ? 'Try a different search term' : 'Create your first fuel record to get started'}
            </p>
-           {(isAdmin || user?.role === 'technician') && !searchTerm && (
-             <button
-               onClick={() => setShowModal(true)}
-               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
-             >
-               Create Fuel Record
-             </button>
-           )}
+            {!searchTerm && (
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+              >
+                Create Fuel Record
+              </button>
+            )}
          </div>
       )}
 
@@ -525,22 +512,20 @@ export default function FuelManagementPage() {
                   />
                 </div>
 
-               {isAdmin && (
-                 <div>
-                   <label className="block text-sm font-medium text-slate-300 mb-1">Technician</label>
-                   <select
-                     value={newFuel.technician}
-                     onChange={(e) => setNewFuel({ ...newFuel, technician: e.target.value })}
-                     className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
-                     required
-                   >
-                     <option value="">Select Technician</option>
-                     {users.filter(u => u.role === 'technician').map((u) => (
-                       <option key={u._id} value={u._id}>{u.name}</option>
-                     ))}
-                   </select>
-                 </div>
-               )}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Technician</label>
+                  <select
+                    value={newFuel.technician}
+                    onChange={(e) => setNewFuel({ ...newFuel, technician: e.target.value })}
+                    className="w-full px-4 py-2.5 border border-slate-700/50 bg-slate-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-100"
+                    required
+                  >
+                    <option value="">Select Technician</option>
+                    {users.filter(u => u.role === 'technician').map((u) => (
+                      <option key={u._id} value={u._id}>{u.name}</option>
+                    ))}
+                  </select>
+                </div>
 
                <div className="flex items-center gap-2">
                  <input
@@ -681,8 +666,7 @@ export default function FuelManagementPage() {
                  />
                </div>
 
-              {isAdmin && (
-                <div>
+               <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
                   <select
                     value={editingFuel.technician?._id || ''}
@@ -701,7 +685,6 @@ export default function FuelManagementPage() {
                     ))}
                   </select>
                 </div>
-              )}
 
               <div className="flex items-center gap-2">
                 <input
@@ -822,15 +805,13 @@ export default function FuelManagementPage() {
                 >
                   Close
                 </button>
-                {(isAdmin || user?._id === viewingFuel.technician?._id) && (
-                  <button
-                    type="button"
-                    onClick={(e) => { setShowViewModal(false); openEditModal(viewingFuel, e); }}
-                    className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
-                  >
-                    Edit
-                  </button>
-                )}
+                 <button
+                   type="button"
+                   onClick={(e) => { setShowViewModal(false); openEditModal(viewingFuel, e); }}
+                   className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
+                 >
+                   Edit
+                 </button>
               </div>
             </div>
           </div>

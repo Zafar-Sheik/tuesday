@@ -262,8 +262,6 @@ export default function CollectionsPage() {
      );
    }
 
-  const isAdmin = user.role === 'admin';
-
   return (
     <>
        {/* Header */}
@@ -274,15 +272,13 @@ export default function CollectionsPage() {
              <p className="text-slate-400 mt-1">Track and manage supplier collections</p>
            </div>
 
-           {isAdmin && (
-             <button
-               onClick={() => setShowModal(true)}
-               className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
-             >
-               <Plus className="w-5 h-5" />
-               <span>New Collection</span>
-             </button>
-           )}
+           <button
+             onClick={() => setShowModal(true)}
+             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+           >
+             <Plus className="w-5 h-5" />
+             <span>New Collection</span>
+           </button>
          </div>
        </div>
 
@@ -317,23 +313,19 @@ export default function CollectionsPage() {
                    </div>
                  </div>
                  <div className="flex items-center gap-1">
-                   {(isAdmin || user?._id === collection.technician?._id) && (
-                     <>
-                       <button
-                         onClick={(e) => openEditModal(collection, e)}
-                         className="p-1.5 text-slate-400 hover:bg-slate-800/50 rounded-lg transition-all"
-                       >
-                         <Edit className="w-4 h-4" />
-                       </button>
-                       <button
-                         onClick={(e) => handleDeleteCollection(collection._id, e)}
-                         className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </button>
-                     </>
-                   )}
-                 </div>
+                    <button
+                      onClick={(e) => openEditModal(collection, e)}
+                      className="p-1.5 text-slate-400 hover:bg-slate-800/50 rounded-lg transition-all"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteCollection(collection._id, e)}
+                      className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                </div>
 
                <div className="space-y-2 text-sm">
@@ -361,23 +353,23 @@ export default function CollectionsPage() {
              </div>
            ))}
          </div>
-      ) : (
-        <div className="text-center py-12">
-          <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No collections found</h3>
-          <p className="text-gray-500 mb-4">
-            {searchTerm ? 'Try a different search term' : 'Create your first collection to get started'}
-          </p>
-          {(isAdmin || user?.role === 'technician') && !searchTerm && (
-            <button
-              onClick={() => setShowModal(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            >
-              Create Collection
-            </button>
-          )}
-        </div>
-      )}
+         ) : (
+         <div className="text-center py-12">
+           <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+           <h3 className="text-lg font-semibold text-gray-900 mb-2">No collections found</h3>
+           <p className="text-gray-500 mb-4">
+             {searchTerm ? 'Try a different search term' : 'Create your first collection to get started'}
+           </p>
+           {!searchTerm && (
+             <button
+               onClick={() => setShowModal(true)}
+               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+             >
+               Create Collection
+             </button>
+           )}
+         </div>
+       )}
 
        {/* Create Collection Modal */}
        {showModal && (

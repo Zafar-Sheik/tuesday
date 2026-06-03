@@ -15,12 +15,8 @@ export async function GET(_request: NextRequest) {
 
     await dbConnect();
 
+    // All users can see all fuel records (removed technician restriction)
     let query = {};
-
-    // Technicians can only see their own fuel records
-    if (user.role === 'technician') {
-      query = { technician: user._id };
-    }
 
     const fuelRecords = await FuelManagement.find(query)
       .populate('technician', 'name email')
@@ -71,8 +67,8 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    // Technicians can only create fuel records for themselves
-    const technicianId = user.role === 'technician' ? user._id : technician || user._id;
+    // All roles can specify any technician ID; if not provided, default to current user
+    const technicianId = technician || user._id;
 
     const fuelRecord = await FuelManagement.create({
       date: new Date(date),

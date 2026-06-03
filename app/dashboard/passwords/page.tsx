@@ -89,11 +89,16 @@ export default function PasswordsPage() {
     e.preventDefault();
 
     try {
+      const body = {
+        ...newEntry,
+        createdBy: user?._id
+      };
+
       const res = await fetch('/api/passwords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(newEntry)
+        body: JSON.stringify(body)
       });
 
       const data = await res.json();
@@ -191,8 +196,8 @@ export default function PasswordsPage() {
     }
   };
 
-  const canEdit = (entry: PasswordEntry) => {
-    return user?.role === 'admin' || entry.createdBy?._id === user?._id;
+  const canEdit = () => {
+    return true;
   };
 
   if (loading || !user) {
@@ -254,25 +259,23 @@ export default function PasswordsPage() {
                     </p>
                   </div>
                 </div>
-                {canEdit(entry) && (
-                  <div className="flex items-center gap-0.5 bg-slate-800/60 rounded-lg p-0.5 border border-slate-700/40 flex-shrink-0">
-                    <button
-                      onClick={(e) => openEditModal(entry, e)}
-                      className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
-                      title="Edit entry"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => handleDeleteEntry(entry._id, e)}
-                      className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
-                      title="Delete entry"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
+                 <div className="flex items-center gap-0.5 bg-slate-800/60 rounded-lg p-0.5 border border-slate-700/40 flex-shrink-0">
+                  <button
+                    onClick={(e) => openEditModal(entry, e)}
+                    className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
+                    title="Edit entry"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteEntry(entry._id, e)}
+                    className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                    title="Delete entry"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                 </div>
+               </div>
 
               {/* Password */}
               <div className="mb-4">

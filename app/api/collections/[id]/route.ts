@@ -9,7 +9,7 @@ export async function PUT(
 ) {
   try {
     const user = await getSessionUser();
-
+    
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -39,14 +39,7 @@ export async function PUT(
       );
     }
 
-    // Check permissions: admin can edit any, technician can edit only their own
-    if (user.role !== 'admin' && collection.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only edit your own collections' },
-        { status: 403 }
-      );
-    }
-
+    // All roles can edit any collection
     if (date) collection.date = new Date(date);
     if (supplier) collection.supplier = supplier;
     if (location) collection.location = location;
@@ -79,7 +72,7 @@ export async function DELETE(
 ) {
   try {
     const user = await getSessionUser();
-
+    
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -88,7 +81,6 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
     await dbConnect();
 
     const collection = await Collection.findById(id);
@@ -100,18 +92,12 @@ export async function DELETE(
       );
     }
 
-    // Check permissions: admin can delete any, technician can delete only their own
-    if (user.role !== 'admin' && collection.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only delete your own collections' },
-        { status: 403 }
-      );
-    }
-
+    // All roles can delete any collection
     await Collection.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
+      data: null,
     });
   } catch (error) {
     console.error('Delete collection error:', error);
