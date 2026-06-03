@@ -12,10 +12,10 @@ declare global {
 }
 
 // Initialize cached connection object if it doesn't exist
-let cached = global.mongoose;
+let cached: MongooseConnection = global.mongoose ?? { conn: null, promise: null };
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+if (!global.mongoose) {
+  global.mongoose = cached;
 }
 
 async function dbConnect(): Promise<typeof mongoose> {
