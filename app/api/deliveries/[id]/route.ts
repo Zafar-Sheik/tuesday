@@ -9,7 +9,7 @@ export async function PUT(
 ) {
   try {
     const user = await getSessionUser();
-
+    
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -42,14 +42,7 @@ export async function PUT(
       );
     }
 
-    // Check permissions: admin can edit any, technician can edit only their own
-    if (user.role !== 'admin' && delivery.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only edit your own deliveries' },
-        { status: 403 }
-      );
-    }
-
+    // All roles can edit any delivery
     if (date) delivery.date = new Date(date);
     if (client) delivery.client = client;
     if (location) delivery.location = location;
@@ -92,7 +85,7 @@ export async function DELETE(
 ) {
   try {
     const user = await getSessionUser();
-
+    
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -101,7 +94,6 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
     await dbConnect();
 
     const delivery = await Delivery.findById(id);
@@ -113,18 +105,12 @@ export async function DELETE(
       );
     }
 
-    // Check permissions: admin can delete any, technician can delete only their own
-    if (user.role !== 'admin' && delivery.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only delete your own deliveries' },
-        { status: 403 }
-      );
-    }
-
+    // All roles can delete any delivery
     await Delivery.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
+      data: null,
     });
   } catch (error) {
     console.error('Delete delivery error:', error);

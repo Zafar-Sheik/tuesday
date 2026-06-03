@@ -9,7 +9,7 @@ export async function PUT(
 ) {
   try {
     const user = await getSessionUser();
-
+    
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -39,14 +39,7 @@ export async function PUT(
       );
     }
 
-    // Check permissions: admin can edit any, technician can edit only their own
-    if (user.role !== 'admin' && workshop.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only edit your own workshop items' },
-        { status: 403 }
-      );
-    }
-
+    // All roles can edit any workshop item
     if (client) workshop.client = client;
     if (itemBookedIn) workshop.itemBookedIn = itemBookedIn;
     if (specs) workshop.specs = specs;
@@ -79,7 +72,7 @@ export async function DELETE(
 ) {
   try {
     const user = await getSessionUser();
-
+    
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -88,7 +81,6 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
     await dbConnect();
 
     const workshop = await Workshop.findById(id);
@@ -100,18 +92,12 @@ export async function DELETE(
       );
     }
 
-    // Check permissions: admin can delete any, technician can delete only their own
-    if (user.role !== 'admin' && workshop.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only delete your own workshop items' },
-        { status: 403 }
-      );
-    }
-
+    // All roles can delete any workshop item
     await Workshop.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
+      data: null,
     });
   } catch (error) {
     console.error('Delete workshop error:', error);

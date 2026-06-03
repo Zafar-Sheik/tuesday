@@ -15,12 +15,8 @@ export async function GET(_request: NextRequest) {
 
     await dbConnect();
 
+    // All users can see all workshop items (removed technician restriction)
     let query = {};
-
-    // Technicians can only see their own workshop items
-    if (user.role === 'technician') {
-      query = { technician: user._id };
-    }
 
     const workshops = await Workshop.find(query)
       .populate('technician', 'name email')
@@ -69,8 +65,8 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    // Technicians can only create workshop items for themselves
-    const technicianId = user.role === 'technician' ? user._id : technician || user._id;
+    // All roles can specify any technician ID; if not provided, default to current user
+    const technicianId = technician || user._id;
 
     const workshop = await Workshop.create({
       client,

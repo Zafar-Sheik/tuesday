@@ -18,10 +18,8 @@ export async function GET(request: NextRequest) {
 
     await dbConnect();
 
+    // All users can see all password entries (removed restriction)
     const query: Record<string, unknown> = {};
-    if (user.role !== 'admin') {
-      query.createdBy = user._id;
-    }
 
     if (search) {
       query.$or = [

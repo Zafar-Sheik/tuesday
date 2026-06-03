@@ -9,7 +9,7 @@ export async function PUT(
 ) {
   try {
     const user = await getSessionUser();
-
+    
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -27,7 +27,8 @@ export async function PUT(
       garage,
       kmDone,
       image,
-      complete
+      complete,
+      technician
     } = await request.json();
 
     await dbConnect();
@@ -41,14 +42,7 @@ export async function PUT(
       );
     }
 
-    // Check permissions: admin can edit any, technician can edit only their own
-    if (user.role !== 'admin' && fuelRecord.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only edit your own fuel records' },
-        { status: 403 }
-      );
-    }
-
+    // All roles can edit any fuel record
     if (date) fuelRecord.date = new Date(date);
     if (vehicle) fuelRecord.vehicle = vehicle;
     if (mileage !== undefined) fuelRecord.mileage = mileage;
@@ -58,6 +52,7 @@ export async function PUT(
     if (kmDone !== undefined) fuelRecord.kmDone = kmDone;
     if (image !== undefined) fuelRecord.image = image;
     if (complete !== undefined) fuelRecord.complete = complete;
+    if (technician) fuelRecord.technician = technician;
 
     await fuelRecord.save();
 
@@ -83,7 +78,7 @@ export async function DELETE(
 ) {
   try {
     const user = await getSessionUser();
-
+    
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -92,7 +87,6 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
     await dbConnect();
 
     const fuelRecord = await FuelManagement.findById(id);
@@ -104,18 +98,12 @@ export async function DELETE(
       );
     }
 
-    // Check permissions: admin can delete any, technician can delete only their own
-    if (user.role !== 'admin' && fuelRecord.technician.toString() !== user._id.toString()) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Can only delete your own fuel records' },
-        { status: 403 }
-      );
-    }
-
+    // All roles can delete any fuel record
     await FuelManagement.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
+      data: null,
     });
   } catch (error) {
     console.error('Delete fuel record error:', error);

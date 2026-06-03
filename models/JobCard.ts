@@ -14,6 +14,7 @@ export interface IJobCard extends Document {
   image?: string;
   clientSignature?: string;
   signedAt?: Date;
+  technician: mongoose.Types.ObjectId;
   complete: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -72,6 +73,11 @@ const JobCardSchema = new Schema<IJobCard>(
     },
     signedAt: {
       type: Date,
+    },
+    technician: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
     complete: {
       type: Boolean,

@@ -65,8 +65,6 @@ export default function WorkshopsPage() {
   const [filter, setFilter] = useState<'all' | 'complete' | 'pending'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const isAdmin = user?.role === 'admin';
-
   const [newWorkshop, setNewWorkshop] = useState<WorkshopFormData>({
     client: '',
     itemBookedIn: '',
@@ -120,16 +118,16 @@ export default function WorkshopsPage() {
     e.preventDefault();
 
     try {
-      const body = {
-        client: newWorkshop.client,
-        itemBookedIn: newWorkshop.itemBookedIn,
-        specs: newWorkshop.specs,
-        faultOfItem: newWorkshop.faultOfItem,
-        workScope: newWorkshop.workScope,
-        image: newWorkshop.image,
-        complete: newWorkshop.complete,
-        ...(isAdmin && newWorkshop.technician ? { technician: newWorkshop.technician } : {})
-      };
+        const body = {
+          client: newWorkshop.client,
+          itemBookedIn: newWorkshop.itemBookedIn,
+          specs: newWorkshop.specs,
+          faultOfItem: newWorkshop.faultOfItem,
+          workScope: newWorkshop.workScope,
+          image: newWorkshop.image,
+          complete: newWorkshop.complete,
+          technician: newWorkshop.technician
+        };
 
       const res = await fetch('/api/workshops', {
         method: 'POST',
@@ -165,16 +163,16 @@ export default function WorkshopsPage() {
     if (!editingWorkshop) return;
 
     try {
-      const body = {
-        client: editingWorkshop.client,
-        itemBookedIn: editingWorkshop.itemBookedIn,
-        specs: editingWorkshop.specs,
-        faultOfItem: editingWorkshop.faultOfItem,
-        workScope: editingWorkshop.workScope,
-        image: editingWorkshop.image,
-        complete: editingWorkshop.complete,
-        ...(isAdmin && editingWorkshop.technician?._id ? { technician: editingWorkshop.technician._id } : {})
-      };
+        const body = {
+          client: editingWorkshop.client,
+          itemBookedIn: editingWorkshop.itemBookedIn,
+          specs: editingWorkshop.specs,
+          faultOfItem: editingWorkshop.faultOfItem,
+          workScope: editingWorkshop.workScope,
+          image: editingWorkshop.image,
+          complete: editingWorkshop.complete,
+          technician: editingWorkshop.technician._id
+        };
 
       const res = await fetch(`/api/workshops/${editingWorkshop._id}`, {
         method: 'PUT',
@@ -267,15 +265,13 @@ export default function WorkshopsPage() {
              <p className="text-slate-400 mt-1">Track and manage workshop repair items</p>
            </div>
 
-           {(isAdmin || user?.role === 'technician') && (
-             <button
-               onClick={() => setShowModal(true)}
-               className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
-             >
-               <Plus className="w-5 h-5" />
-               <span>New Workshop Item</span>
-             </button>
-           )}
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+          >
+            <Plus className="w-5 h-5" />
+            <span>New Workshop Item</span>
+          </button>
          </div>
        </div>
 
@@ -332,53 +328,20 @@ export default function WorkshopsPage() {
                      <p className="text-xs text-slate-400">{new Date(workshop.createdAt).toLocaleDateString()}</p>
                    </div>
                  </div>
-                 <div className="flex items-center gap-1">
-                   {(isAdmin || user?._id === workshop.technician?._id) && (
-                     <>
-                       <button
-                         onClick={(e) => openEditModal(workshop, e)}
-                         className="p-1.5 text-slate-400 hover:bg-slate-800/50 rounded-lg transition-all"
-                       >
-                         <Edit className="w-4 h-4" />
-                       </button>
-                       <button
-                         onClick={(e) => handleDeleteWorkshop(workshop._id, e)}
-                         className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </button>
-                     </>
-                   )}
-                   <span className={`ml-1 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${workshop.complete ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
-                     {workshop.complete ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                     {workshop.complete ? 'Completed' : 'Pending'}
-                   </span>
-                 </div>
-               </div>
-
-               <div className="space-y-2 text-sm">
-                 <div className="flex items-center gap-2 text-slate-300">
-                   <UserIcon className="w-4 h-4 text-slate-400" />
-                   <span className="truncate">{workshop.client}</span>
-                 </div>
-                 <div className="flex items-center gap-2 text-slate-300">
-                   <FileText className="w-4 h-4 text-slate-400" />
-                   <span className="truncate">{workshop.faultOfItem}</span>
-                 </div>
-                 <div className="flex items-center gap-2 text-slate-300">
-                   <Wrench className="w-4 h-4 text-slate-400" />
-                   <span className="truncate">{workshop.workScope}</span>
-                 </div>
-                 <div className="flex items-center gap-2 text-slate-300">
-                   <UserIcon className="w-4 h-4 text-slate-400" />
-                   <span>{workshop.technician?.name || 'Unassigned'}</span>
-                 </div>
-                 {workshop.image && (
-                   <div className="flex items-center gap-2 text-slate-300">
-                     <ImageIcon className="w-4 h-4 text-slate-400" />
-                     <span className="text-xs text-slate-400">Photo attached</span>
-                   </div>
-                 )}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => openEditModal(workshop, e)}
+                      className="p-1.5 text-slate-400 hover:bg-slate-800/50 rounded-lg transition-all"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteWorkshop(workshop._id, e)}
+                      className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                </div>
              </div>
            ))}
@@ -390,14 +353,14 @@ export default function WorkshopsPage() {
            <p className="text-slate-400 mb-4">
              {searchTerm ? 'Try a different search term' : 'Create your first workshop item to get started'}
            </p>
-           {(isAdmin || user?.role === 'technician') && !searchTerm && (
-             <button
-               onClick={() => setShowModal(true)}
-               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
-             >
-               Create Workshop Item
-             </button>
-           )}
+            {!searchTerm && (
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-900/20 transition-all"
+              >
+                Create Workshop Item
+              </button>
+            )}
          </div>
       )}
 
@@ -482,8 +445,7 @@ export default function WorkshopsPage() {
                 />
               </div>
 
-              {isAdmin && (
-                <div>
+              <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
                   <select
                     value={newWorkshop.technician}
@@ -497,7 +459,6 @@ export default function WorkshopsPage() {
                     ))}
                   </select>
                 </div>
-              )}
 
               <div className="flex items-center gap-2">
                 <input
@@ -608,8 +569,7 @@ export default function WorkshopsPage() {
                 />
               </div>
 
-              {isAdmin && (
-                <div>
+               <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Technician</label>
                   <select
                     value={editingWorkshop.technician?._id || ''}
@@ -628,7 +588,6 @@ export default function WorkshopsPage() {
                     ))}
                   </select>
                 </div>
-              )}
 
               <div className="flex items-center gap-2">
                 <input
@@ -737,15 +696,13 @@ export default function WorkshopsPage() {
                 >
                   Close
                 </button>
-                {(isAdmin || user?._id === viewingWorkshop.technician?._id) && (
-                  <button
-                    type="button"
-                    onClick={(e) => { setShowViewModal(false); openEditModal(viewingWorkshop, e); }}
-                    className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
-                  >
-                    Edit
-                  </button>
-                )}
+                 <button
+                   type="button"
+                   onClick={(e) => { setShowViewModal(false); openEditModal(viewingWorkshop, e); }}
+                   className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700"
+                 >
+                   Edit
+                 </button>
               </div>
             </div>
           </div>

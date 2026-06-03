@@ -17,10 +17,7 @@ export async function GET(_request: NextRequest) {
 
     let query = {};
 
-    // Technicians can only see their own job cards
-    if (user.role === 'technician') {
-      query = { technician: user._id };
-    }
+    // All users can see all job cards (removed technician restriction)
 
     const jobCards = await JobCard.find(query)
       .populate('technician', 'name email')
@@ -75,8 +72,8 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    // Technicians can only create job cards for themselves
-    const technicianId = user.role === 'technician' ? user._id : technician || user._id;
+    // All roles can specify any technician ID; if not provided, default to current user
+    const technicianId = technician || user._id;
 
     const jobCard = await JobCard.create({
       date: new Date(date),
