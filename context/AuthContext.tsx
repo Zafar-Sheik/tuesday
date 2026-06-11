@@ -22,36 +22,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const refreshUser = useCallback(async () => {
-    let retries = 3;
-    while (retries > 0) {
-      try {
-        setError(null);
-        const res = await fetch('/api/auth/me', {
-          credentials: 'include',
-          cache: 'no-store'
-        });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        const data: ApiResponse<SessionUser> = await res.json();
-
-        if (data.success && data.data) {
-          setUser(data.data);
-          setError(null);
-          break;
-        } else {
-          throw new Error(data.error || 'Not authenticated');
-        }
-      } catch (err) {
-        retries--;
-        if (retries === 0) {
-          console.error('Error refreshing user:', err);
+    try {
+      setError(null);
+      const res = await fetch('/api/auth/me', {
+        credentials: 'include',
+        cache: 'no-store'
+      });
+      if (!res.ok) {
+        if (res.status === 401) {
           setUser(null);
-          setError('Failed to connect to authentication service');
-        } else {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          setError(null);
+          return;
         }
+        throw new Error(`HTTP ${res.status}`);
       }
+      const data: ApiResponse<SessionUser> = await res.json();
+
+      if (data.success && data.data) {
+        setUser(data.data);
+        setError(null);
+      } else {
+        setUser(null);
+        setError(data.error || 'Not authenticated');
+      }
+    } catch (err) {
+      console.error('Error refreshing user:', err);
+      setUser(null);
+      setError('Failed to connect to authentication service');
     }
   }, []);
 

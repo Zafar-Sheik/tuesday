@@ -55,14 +55,19 @@ export default function CalendarPage() {
     }
   }, [user, authLoading, router]);
 
+  async function apiFetch(url: string, options?: RequestInit) {
+    const res = await fetch(url, { credentials: 'include', ...options });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/projects?sortBy=dueDate&sortOrder=asc');
-      const data = await res.json();
-      if (data.success) {
-        setProjects(data.data);
-      }
+      const { data } = await apiFetch('/api/projects?sortBy=dueDate&sortOrder=asc');
+      setProjects(data);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {

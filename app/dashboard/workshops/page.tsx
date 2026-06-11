@@ -88,13 +88,18 @@ export default function WorkshopsPage() {
     }
   }, [user, authLoading, router]);
 
+  async function apiFetch(url: string, options?: RequestInit) {
+    const res = await fetch(url, { credentials: 'include', ...options });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
   const fetchWorkshops = async () => {
     try {
-      const res = await fetch('/api/workshops');
-      const data = await res.json();
-      if (data.success) {
-        setWorkshops(data.data);
-      }
+      const { data } = await apiFetch('/api/workshops');
+      setWorkshops(data);
     } catch (error) {
       console.error('Error fetching workshops:', error);
     } finally {
@@ -104,11 +109,8 @@ export default function WorkshopsPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users');
-      const data = await res.json();
-      if (data.success) {
-        setUsers(data.data);
-      }
+      const { data } = await apiFetch('/api/users');
+      setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -129,7 +131,7 @@ export default function WorkshopsPage() {
           technician: newWorkshop.technician
         };
 
-      const res = await fetch('/api/workshops', {
+      const res = await apiFetch('/api/workshops', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -163,7 +165,10 @@ export default function WorkshopsPage() {
     if (!editingWorkshop) return;
 
     try {
-        const body = {
+      const res = await apiFetch(`/api/workshops/${editingWorkshop._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           client: editingWorkshop.client,
           itemBookedIn: editingWorkshop.itemBookedIn,
           specs: editingWorkshop.specs,
@@ -172,25 +177,19 @@ export default function WorkshopsPage() {
           image: editingWorkshop.image,
           complete: editingWorkshop.complete,
           technician: editingWorkshop.technician._id
-        };
-
-      const res = await fetch(`/api/workshops/${editingWorkshop._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        })
       });
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (res.success === true) {
         setShowEditModal(false);
         setEditingWorkshop(null);
         fetchWorkshops();
       } else {
-        alert(data.error || 'Failed to update workshop item');
+        alert(res.error || 'Failed to update workshop item');
       }
     } catch (error) {
       console.error('Error updating workshop:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update workshop item');
     }
   };
 
@@ -199,7 +198,7 @@ export default function WorkshopsPage() {
     if (!confirm('Are you sure you want to delete this workshop item?')) return;
 
     try {
-      const res = await fetch(`/api/workshops/${workshopId}`, {
+      const res = await apiFetch(`/api/workshops/${workshopId}`, {
         method: 'DELETE'
       });
 

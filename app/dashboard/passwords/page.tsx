@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -34,36 +34,24 @@ export default function PasswordsPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<PasswordEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+
   const [newEntry, setNewEntry] = useState({
     title: '',
     password: '',
     notes: ''
   });
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-
-    if (user) {
-      fetchPasswords();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading, router, searchTerm]);
-
-  const fetchPasswords = useCallback(async () => {
-    setLoading(true);
+  const fetchPasswords = useCallback(async (term?: string) => {
     try {
       const params = new URLSearchParams();
-      if (searchTerm) {
-        params.set('search', searchTerm);
+      if (term) {
+        params.set('search', term);
       }
       const res = await fetch(`/api/passwords?${params}`, {
         credentials: 'include',
@@ -80,10 +68,30 @@ export default function PasswordsPage() {
       }
     } catch (error) {
       console.error('Error fetching passwords:', error);
-    } finally {
-      setLoading(false);
     }
-  }, [searchTerm]);
+  }, []);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      setInitialLoading(false);
+      return;
+    }
+
+    if (user) {
+      fetchPasswords().finally(() => setInitialLoading(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading, router]);
+
+  const filteredPasswords = useMemo(() => {
+    if (!searchTerm.trim()) return passwords;
+    const term = searchTerm.toLowerCase();
+    return passwords.filter(entry =>
+      entry.title.toLowerCase().includes(term) ||
+      entry.notes?.toLowerCase().includes(term)
+    );
+  }, [passwords, searchTerm]);
 
   const handleCreateEntry = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,7 +208,7 @@ export default function PasswordsPage() {
     return true;
   };
 
-  if (loading || !user) {
+  if (initialLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
@@ -239,9 +247,9 @@ export default function PasswordsPage() {
       </div>
 
       {/* Passwords Grid */}
-      {passwords.length > 0 ? (
+      {filteredPasswords.length > 0 ? (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {passwords.map((entry) => (
+          {filteredPasswords.map((entry) => (
             <div
               key={entry._id}
               className="group glass rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/70 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/20"

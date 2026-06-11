@@ -49,11 +49,13 @@ export default function ProjectTypesPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
+      setLoading(false);
       return;
     }
 
     if (user && user.role !== 'admin') {
       router.push('/dashboard');
+      setLoading(false);
       return;
     }
     
@@ -62,13 +64,18 @@ export default function ProjectTypesPage() {
     }
   }, [user, authLoading, router]);
 
+  async function apiFetch(url: string, options?: RequestInit) {
+    const res = await fetch(url, { credentials: 'include', ...options });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
   const fetchProjectTypes = async () => {
     try {
-      const res = await fetch('/api/project-types');
-      const data = await res.json();
-      if (data.success) {
-        setProjectTypes(data.data);
-      }
+      const { data } = await apiFetch('/api/project-types');
+      setProjectTypes(data);
     } catch (error) {
       console.error('Error fetching project types:', error);
     } finally {
@@ -85,15 +92,13 @@ export default function ProjectTypesPage() {
     }
 
     try {
-      const res = await fetch('/api/project-types', {
+      const { data } = await apiFetch('/api/project-types', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProjectType)
       });
       
-      const data = await res.json();
-      
-      if (data.success) {
+      if (data.success === true) {
         setShowModal(false);
         setNewProjectType({
           name: '',
@@ -106,6 +111,7 @@ export default function ProjectTypesPage() {
       }
     } catch (error) {
       console.error('Error creating project type:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create project type');
     }
   };
 
@@ -119,7 +125,7 @@ export default function ProjectTypesPage() {
     }
     
     try {
-      const res = await fetch(`/api/project-types/${editingProjectType._id}`, {
+      const { data } = await apiFetch(`/api/project-types/${editingProjectType._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -129,9 +135,7 @@ export default function ProjectTypesPage() {
         })
       });
       
-      const data = await res.json();
-      
-      if (data.success) {
+      if (data.success === true) {
         setShowEditModal(false);
         setEditingProjectType(null);
         fetchProjectTypes();
@@ -140,6 +144,7 @@ export default function ProjectTypesPage() {
       }
     } catch (error) {
       console.error('Error updating project type:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update project type');
     }
   };
 
@@ -147,22 +152,10 @@ export default function ProjectTypesPage() {
     if (!confirm('Are you sure you want to delete this project type?')) return;
     
     try {
-      const res = await fetch(`/api/project-types/${id}`, {
+      const { data } = await apiFetch(`/api/project-types/${id}`, {
         method: 'DELETE'
       });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          alert(errorData.error || 'Failed to delete project type');
-        } catch {
-          alert('Failed to delete project type');
-        }
-        return;
-      }
-      
-      const data = await res.json();
+
       if (data.success) {
         fetchProjectTypes();
       } else {
@@ -170,6 +163,7 @@ export default function ProjectTypesPage() {
       }
     } catch (error) {
       console.error('Error deleting project type:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete project type');
     }
   };
 
