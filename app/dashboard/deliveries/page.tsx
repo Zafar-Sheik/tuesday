@@ -84,13 +84,18 @@ export default function DeliveriesPage() {
     }
   }, [user, authLoading, router]);
 
+  async function apiFetch(url: string, options?: RequestInit) {
+    const res = await fetch(url, { credentials: 'include', ...options });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
   const fetchDeliveries = async () => {
     try {
-      const res = await fetch('/api/deliveries');
-      const data = await res.json();
-      if (data.success) {
-        setDeliveries(data.data);
-      }
+      const { data } = await apiFetch('/api/deliveries');
+      setDeliveries(data);
     } catch (error) {
       console.error('Error fetching deliveries:', error);
     } finally {
@@ -100,11 +105,8 @@ export default function DeliveriesPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users');
-      const data = await res.json();
-      if (data.success) {
-        setUsers(data.data);
-      }
+      const { data } = await apiFetch('/api/users');
+      setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -114,15 +116,13 @@ export default function DeliveriesPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch('/api/deliveries', {
+      const { data } = await apiFetch('/api/deliveries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newDelivery)
       });
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (data.success === true) {
         setShowModal(false);
         setNewDelivery({
           date: '',
@@ -142,6 +142,7 @@ export default function DeliveriesPage() {
       }
     } catch (error) {
       console.error('Error creating delivery:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create delivery');
     }
   };
 
@@ -150,7 +151,7 @@ export default function DeliveriesPage() {
     if (!editingDelivery) return;
 
     try {
-      const res = await fetch(`/api/deliveries/${editingDelivery._id}`, {
+      const { data } = await apiFetch(`/api/deliveries/${editingDelivery._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -167,9 +168,7 @@ export default function DeliveriesPage() {
         })
       });
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (data.success === true) {
         setShowEditModal(false);
         setEditingDelivery(null);
         fetchDeliveries();
@@ -178,6 +177,7 @@ export default function DeliveriesPage() {
       }
     } catch (error) {
       console.error('Error updating delivery:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update delivery');
     }
   };
 
@@ -186,22 +186,10 @@ export default function DeliveriesPage() {
     if (!confirm('Are you sure you want to delete this delivery?')) return;
 
     try {
-      const res = await fetch(`/api/deliveries/${deliveryId}`, {
+      const { data } = await apiFetch(`/api/deliveries/${deliveryId}`, {
         method: 'DELETE'
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          alert(errorData.error || 'Failed to delete delivery');
-        } catch {
-          alert('Failed to delete delivery');
-        }
-        return;
-      }
-
-      const data = await res.json();
       if (data.success) {
         fetchDeliveries();
       } else {
@@ -209,6 +197,7 @@ export default function DeliveriesPage() {
       }
     } catch (error) {
       console.error('Error deleting delivery:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete delivery');
     }
   };
 

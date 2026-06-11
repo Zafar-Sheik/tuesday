@@ -82,6 +82,14 @@ export default function ProjectDetailPage() {
     }
   }, [user, authLoading, router, projectId]);
 
+  async function apiFetch(url: string, options?: RequestInit) {
+    const res = await fetch(url, { credentials: 'include', ...options });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
   useEffect(() => {
     if (showEditModal && canvasRef.current) {
       const canvas = canvasRef.current;
@@ -98,12 +106,9 @@ export default function ProjectDetailPage() {
 
   const fetchProject = async () => {
     try {
-      const res = await fetch(`/api/projects/${projectId}`);
-      const data = await res.json();
-      if (data.success) {
-        setProject(data.data.project);
-        setTasks(data.data.tasks || []);
-      }
+      const { data } = await apiFetch(`/api/projects/${projectId}`);
+      setProject(data.project);
+      setTasks(data.tasks || []);
     } catch (error) {
       console.error('Error fetching project:', error);
     } finally {
@@ -115,15 +120,13 @@ export default function ProjectDetailPage() {
     e.preventDefault();
     
     try {
-      const res = await fetch('/api/tasks', {
+      const { data } = await apiFetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...newTask, project: projectId })
       });
       
-      const data = await res.json();
-      
-      if (data.success) {
+      if (data.success === true) {
         setShowTaskModal(false);
         setNewTask({
           title: '',
@@ -137,23 +140,24 @@ export default function ProjectDetailPage() {
       }
     } catch (error) {
       console.error('Error creating task:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create task');
     }
   };
 
   const handleUpdateTaskStatus = async (taskId: string, newStatus: string) => {
     try {
-      const res = await fetch(`/api/tasks/${taskId}`, {
+      const { data } = await apiFetch(`/api/tasks/${taskId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
       
-      const data = await res.json();
-      if (data.success) {
+      if (data.success === true) {
         fetchProject();
       }
     } catch (error) {
       console.error('Error updating task:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update task');
     }
   };
 
@@ -161,20 +165,8 @@ export default function ProjectDetailPage() {
     if (!confirm('Are you sure you want to delete this task?')) return;
     
     try {
-      const res = await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          alert(errorData.error || 'Failed to delete task');
-        } catch {
-          alert('Failed to delete task');
-        }
-        return;
-      }
-      
-      const data = await res.json();
+      const { data } = await apiFetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
+
       if (data.success) {
         fetchProject();
       } else {
@@ -182,6 +174,7 @@ export default function ProjectDetailPage() {
       }
     } catch (error) {
       console.error('Error deleting task:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete task');
     }
   };
 
@@ -189,19 +182,19 @@ export default function ProjectDetailPage() {
     e.preventDefault();
     
     try {
-      const res = await fetch(`/api/projects/${projectId}`, {
+      const { data } = await apiFetch(`/api/projects/${projectId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: project?.status })
       });
       
-      const data = await res.json();
-      if (data.success) {
+      if (data.success === true) {
         setShowEditModal(false);
         fetchProject();
       }
     } catch (error) {
       console.error('Error updating project:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update project');
     }
   };
 
@@ -278,14 +271,13 @@ export default function ProjectDetailPage() {
     const signatureData = canvas.toDataURL('image/png');
     
     try {
-      const res = await fetch(`/api/projects/${projectId}/signoff`, {
+      const { data } = await apiFetch(`/api/projects/${projectId}/signoff`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signature: signatureData })
       });
       
-      const data = await res.json();
-      if (data.success) {
+      if (data.success === true) {
         setShowEditModal(false);
         fetchProject();
       } else {
@@ -293,6 +285,7 @@ export default function ProjectDetailPage() {
       }
     } catch (error) {
       console.error('Error saving signature:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save signature');
     }
   };
 

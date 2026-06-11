@@ -50,6 +50,7 @@ export default function UsersPage() {
     
     if (user && user.role !== 'admin') {
       router.push('/dashboard');
+      setLoading(false);
       return;
     }
     
@@ -58,13 +59,18 @@ export default function UsersPage() {
     }
   }, [user, authLoading, router]);
 
+  async function apiFetch(url: string, options?: RequestInit) {
+    const res = await fetch(url, { credentials: 'include', ...options });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users');
-      const data = await res.json();
-      if (data.success) {
-        setUsers(data.data);
-      }
+      const { data } = await apiFetch('/api/users');
+      setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -76,15 +82,13 @@ export default function UsersPage() {
     e.preventDefault();
     
     try {
-      const res = await fetch('/api/users', {
+      const { data } = await apiFetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser)
       });
       
-      const data = await res.json();
-      
-      if (data.success) {
+      if (data.success === true) {
         setShowModal(false);
         setNewUser({
           name: '',
@@ -98,6 +102,7 @@ export default function UsersPage() {
       }
     } catch (error) {
       console.error('Error creating user:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create user');
     }
   };
 
@@ -106,7 +111,7 @@ export default function UsersPage() {
     if (!editingUser) return;
     
     try {
-      const res = await fetch(`/api/users/${editingUser._id}`, {
+      const { data } = await apiFetch(`/api/users/${editingUser._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -117,9 +122,7 @@ export default function UsersPage() {
         })
       });
       
-      const data = await res.json();
-      
-      if (data.success) {
+      if (data.success === true) {
         setShowEditModal(false);
         setEditingUser(null);
         fetchUsers();
@@ -128,6 +131,7 @@ export default function UsersPage() {
       }
     } catch (error) {
       console.error('Error updating user:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update user');
     }
   };
 
@@ -135,22 +139,10 @@ export default function UsersPage() {
     if (!confirm('Are you sure you want to delete this user?')) return;
     
     try {
-      const res = await fetch(`/api/users/${userId}`, {
+      const { data } = await apiFetch(`/api/users/${userId}`, {
         method: 'DELETE'
       });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          alert(errorData.error || 'Failed to delete user');
-        } catch {
-          alert('Failed to delete user');
-        }
-        return;
-      }
-      
-      const data = await res.json();
+
       if (data.success) {
         fetchUsers();
       } else {
@@ -158,6 +150,7 @@ export default function UsersPage() {
       }
     } catch (error) {
       console.error('Error deleting user:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete user');
     }
   };
 

@@ -76,13 +76,18 @@ export default function CollectionsPage() {
     }
   }, [user, authLoading, router]);
 
+  async function apiFetch(url: string, options?: RequestInit) {
+    const res = await fetch(url, { credentials: 'include', ...options });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
   const fetchCollections = async () => {
     try {
-      const res = await fetch('/api/collections');
-      const data = await res.json();
-      if (data.success) {
-        setCollections(data.data);
-      }
+      const { data } = await apiFetch('/api/collections');
+      setCollections(data);
     } catch (error) {
       console.error('Error fetching collections:', error);
     } finally {
@@ -92,11 +97,8 @@ export default function CollectionsPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/users');
-      const data = await res.json();
-      if (data.success) {
-        setUsers(data.data);
-      }
+      const { data } = await apiFetch('/api/users');
+      setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -106,15 +108,13 @@ export default function CollectionsPage() {
     e.preventDefault();
 
     try {
-      const res = await fetch('/api/collections', {
+      const { data } = await apiFetch('/api/collections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCollection)
       });
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (data.success === true) {
         setShowModal(false);
         setNewCollection({
           date: '',
@@ -131,6 +131,7 @@ export default function CollectionsPage() {
       }
     } catch (error) {
       console.error('Error creating collection:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create collection');
     }
   };
 
@@ -139,7 +140,7 @@ export default function CollectionsPage() {
     if (!editingCollection) return;
 
     try {
-      const res = await fetch(`/api/collections/${editingCollection._id}`, {
+      const { data } = await apiFetch(`/api/collections/${editingCollection._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -153,9 +154,7 @@ export default function CollectionsPage() {
         })
       });
 
-      const data = await res.json();
-
-      if (data.success) {
+      if (data.success === true) {
         setShowEditModal(false);
         setEditingCollection(null);
         fetchCollections();
@@ -164,6 +163,7 @@ export default function CollectionsPage() {
       }
     } catch (error) {
       console.error('Error updating collection:', error);
+      alert(error instanceof Error ? error.message : 'Failed to update collection');
     }
   };
 
@@ -172,22 +172,10 @@ export default function CollectionsPage() {
     if (!confirm('Are you sure you want to delete this collection?')) return;
 
     try {
-      const res = await fetch(`/api/collections/${collectionId}`, {
+      const { data } = await apiFetch(`/api/collections/${collectionId}`, {
         method: 'DELETE'
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        try {
-          const errorData = JSON.parse(errorText);
-          alert(errorData.error || 'Failed to delete collection');
-        } catch {
-          alert('Failed to delete collection');
-        }
-        return;
-      }
-
-      const data = await res.json();
       if (data.success) {
         fetchCollections();
       } else {
@@ -195,6 +183,7 @@ export default function CollectionsPage() {
       }
     } catch (error) {
       console.error('Error deleting collection:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete collection');
     }
   };
 
