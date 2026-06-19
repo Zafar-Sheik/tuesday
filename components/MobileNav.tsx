@@ -16,7 +16,8 @@ import {
   Wrench,
   Fuel,
   Clock,
-  Settings
+  Settings,
+  KeyRound
 } from 'lucide-react';
 
 interface MobileNavProps {
@@ -54,6 +55,7 @@ export default function MobileNav({ user }: MobileNavProps) {
     { label: 'Workshop', icon: Wrench, href: '/dashboard/workshops' },
     { label: 'Fuel', icon: Fuel, href: '/dashboard/fuel-management' },
     { label: 'Calendar', icon: Calendar, href: '/dashboard/calendar' },
+    { label: 'Passwords', icon: KeyRound, href: '/dashboard/passwords' },
     { label: 'Users', icon: Users, href: '/dashboard/users', show: isAdmin },
     { label: 'Project Types', icon: Settings, href: '/dashboard/project-types', show: isAdmin },
   ];
